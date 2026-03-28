@@ -2,6 +2,7 @@ package br.com.dev_livery.controller;
 
 import br.com.dev_livery.dao.ClienteDAO;
 import br.com.dev_livery.dto.ClienteDTO;
+import br.com.dev_livery.dto.ClienteResponseDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,21 @@ public class ClienteController {
             return ResponseEntity.ok("Cliente cadastrado com sucesso!");
         } catch (SQLException e) {
             return ResponseEntity.internalServerError().body("Erro no banco: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{cpf}")
+    public ResponseEntity<ClienteResponseDTO> buscarCliente(@PathVariable String cpf) {
+        try {
+            ClienteResponseDTO cliente = clienteDAO.buscarPorCpf(cpf);
+
+            if (cliente != null) {
+                return ResponseEntity.ok(cliente);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (SQLException e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

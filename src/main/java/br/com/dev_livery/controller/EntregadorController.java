@@ -2,6 +2,7 @@ package br.com.dev_livery.controller;
 
 import br.com.dev_livery.dao.EntregadorDAO;
 import br.com.dev_livery.dto.EntregadorDTO;
+import br.com.dev_livery.dto.EntregadorResponseDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,21 @@ public class EntregadorController {
             return ResponseEntity.ok("Entregador cadastrado com sucesso!");
         } catch (SQLException e) {
             return ResponseEntity.internalServerError().body("Erro no banco: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{cpf}")
+    public ResponseEntity<EntregadorResponseDTO> buscarEntregador(@PathVariable String cpf) {
+        try {
+            EntregadorResponseDTO entregador = entregadorDAO.buscarPorCpf(cpf);
+
+            if (entregador != null) {
+                return ResponseEntity.ok(entregador);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (SQLException e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

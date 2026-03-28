@@ -37,6 +37,8 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/clientes/cadastro").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/entregadores/cadastro").permitAll()
+                        .requestMatchers("/api/clientes/**").hasRole("CLIENTE")
+                        .requestMatchers("/api/entregadores/**").hasRole("ENTREGADOR")
                         .requestMatchers(
                                 "/",
                                 "/index.html",

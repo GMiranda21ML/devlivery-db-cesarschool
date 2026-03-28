@@ -32,6 +32,19 @@ public class TokenService {
         }
     }
 
+    public String obterRole(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.require(algorithm)
+                    .withIssuer("dev-livery")
+                    .build()
+                    .verify(token)
+                    .getClaim("role").asString();
+        } catch (JWTVerificationException exception) {
+            return "";
+        }
+    }
+
     public String validarToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);

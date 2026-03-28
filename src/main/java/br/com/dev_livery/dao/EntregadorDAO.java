@@ -1,9 +1,11 @@
 package br.com.dev_livery.dao;
 
+import br.com.dev_livery.dto.EntregadorResponseDTO;
 import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Repository
@@ -54,6 +56,40 @@ public class EntregadorDAO {
                 throw e;
             }
         }
+    }
+
+    public EntregadorResponseDTO buscarPorCpf(String cpf) throws SQLException {
+        String sql = """
+                SELECT
+                	U.NOME, U.EMAIL, U.CPF,
+                	E.NOTA, E.VEICULO, E.PLACA,
+                	T.NUMERO AS TELEFONE
+                FROM USUARIO U
+                INNER JOIN ENTREGADOR E ON U.CPF = E.CPF
+                INNER JOIN TELEFONE T ON U.CPF = T.CPF
+                WHERE U.CPF = ?;
+                """;
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, cpf);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new EntregadorResponseDTO(
+                            rs.getString("CPF"),
+                            rs.getString("NOME"),
+                            rs.getString("EMAIL"),
+                            rs.getString("TELEFONE"),
+                            rs.getString("VEICULO"),
+                            rs.getString("PLACA"),
+                            rs.getDouble("NOTA")
+                    );
+                }
+            }
+        }
+        return null;
     }
     
     // atualizar depois para poder atualizar o telefone tambem!

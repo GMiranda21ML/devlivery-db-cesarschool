@@ -1,9 +1,11 @@
 package br.com.dev_livery.dao;
 
+import br.com.dev_livery.dto.ClienteResponseDTO;
 import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Repository
@@ -23,7 +25,7 @@ public class ClienteDAO {
         String sqlCliente = "INSERT INTO CLIENTE (CPF, RUA, CIDADE, NUMERO, BAIRRO, CEP, CONVIDADO) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = dataSource.getConnection()) {
-            conn.setAutoCommit(false); // Inicia transação
+            conn.setAutoCommit(false);
 
             try (PreparedStatement usuario = conn.prepareStatement(sqlUsuario);
                  PreparedStatement numTelefone = conn.prepareStatement(sqlTelefone);
@@ -62,6 +64,44 @@ public class ClienteDAO {
                 throw e;
             }
         }
+    }
+
+    public ClienteResponseDTO buscarPorCpf(String cpf) throws SQLException {
+        // Usamos JOIN para juntar as 3 tabelas baseadas no CPF
+        String sql = """
+                SELECT
+                	U.NOME, U.EMAIL, U.CPF,
+                	C.CEP, C.CEP, C.RUA, C.NUMERO AS NUM_ENDERECO, C.BAIRRO, C.CIDADE, C.CONVIDADO,
+                	T.NUMERO AS TELEFONE
+                FROM USUARIO U
+                INNER JOIN CLIENTE C ON U.CPF = C.CPF
+                INNER JOIN TELEFONE T ON U.CPF = T.CPF
+                WHERE U.CPF = ?
+                """;
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, cpf);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new ClienteResponseDTO(
+                            rs.getString("CPF"),
+                            rs.getString("NOME"),
+                            rs.getString("EMAIL"),
+                            rs.getString("TELEFONE"),
+                            rs.getString("CEP"),
+                            rs.getString("RUA"),
+                            rs.getString("NUM_ENDERECO"),
+                            rs.getString("BAIRRO"),
+                            rs.getString("CIDADE"),
+                            rs.getString("CONVIDADO")
+                    );
+                }
+            }
+        }
+        return null;
     }
 
     public void atualizarEndereco(String cpf, String rua, String numero, String bairro, String cidade, String cep) throws SQLException {
