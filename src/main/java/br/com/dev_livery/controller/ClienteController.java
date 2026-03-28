@@ -3,6 +3,7 @@ package br.com.dev_livery.controller;
 import br.com.dev_livery.dao.ClienteDAO;
 import br.com.dev_livery.dto.ClienteDTO;
 import br.com.dev_livery.dto.ClienteResponseDTO;
+import br.com.dev_livery.dto.EnderecoResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +44,21 @@ public class ClienteController {
 
             if (cliente != null) {
                 return ResponseEntity.ok(cliente);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (SQLException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/buscar-endereco/{cpf}")
+    public ResponseEntity<EnderecoResponse> buscarEndereco(@PathVariable String cpf) {
+        try {
+            EnderecoResponse endereco = clienteDAO.buscarEndereco(cpf);
+
+            if (endereco != null) {
+                return ResponseEntity.ok(endereco);
             } else {
                 return ResponseEntity.notFound().build();
             }

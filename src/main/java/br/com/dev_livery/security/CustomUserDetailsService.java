@@ -23,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        String sql = "SELECT EMAIL, SENHA FROM USUARIO WHERE EMAIL = ?";
+        String sql = "SELECT CPF, EMAIL, SENHA FROM USUARIO WHERE EMAIL = ?";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement usuario = conn.prepareStatement(sql)) {
@@ -32,11 +32,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
             try (ResultSet rs = usuario.executeQuery()) {
                 if (rs.next()) {
-                    String emailBanco = rs.getString("EMAIL");
+                    //String emailBanco = rs.getString("EMAIL");
+                    String cpfBanco = rs.getString("CPF");
                     String senhaBanco = rs.getString("SENHA");
 
                     // Retorna um usuário no formato que o Spring Security entende
-                    return new User(emailBanco, senhaBanco, new ArrayList<>());
+                    return new User(cpfBanco, senhaBanco, new ArrayList<>());
                 } else {
                     throw new UsernameNotFoundException("Usuário não encontrado com o e-mail: " + email);
                 }

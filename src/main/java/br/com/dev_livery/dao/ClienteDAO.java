@@ -1,6 +1,7 @@
 package br.com.dev_livery.dao;
 
 import br.com.dev_livery.dto.ClienteResponseDTO;
+import br.com.dev_livery.dto.EnderecoResponse;
 import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -71,7 +72,7 @@ public class ClienteDAO {
         String sql = """
                 SELECT
                 	U.NOME, U.EMAIL, U.CPF,
-                	C.CEP, C.CEP, C.RUA, C.NUMERO AS NUM_ENDERECO, C.BAIRRO, C.CIDADE, C.CONVIDADO,
+                	C.CEP, C.RUA, C.NUMERO AS NUM_ENDERECO, C.BAIRRO, C.CIDADE, C.CONVIDADO,
                 	T.NUMERO AS TELEFONE
                 FROM USUARIO U
                 INNER JOIN CLIENTE C ON U.CPF = C.CPF
@@ -97,6 +98,35 @@ public class ClienteDAO {
                             rs.getString("BAIRRO"),
                             rs.getString("CIDADE"),
                             rs.getString("CONVIDADO")
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
+    public EnderecoResponse buscarEndereco(String cpf) throws SQLException {
+        String sql = """
+                SELECT C.CEP, C.RUA, C.NUMERO, C.BAIRRO, C.CIDADE
+                FROM USUARIO U
+                INNER JOIN CLIENTE C ON U.CPF = C.CPF
+                WHERE U.CPF = ?
+                """;
+
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, cpf);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new EnderecoResponse(
+                            rs.getString("CEP"),
+                            rs.getString("RUA"),
+                            rs.getString("NUMERO"),
+                            rs.getString("BAIRRO"),
+                            rs.getString("CIDADE")
                     );
                 }
             }
@@ -148,4 +178,6 @@ public class ClienteDAO {
             }
         }
     }
+
+
 }

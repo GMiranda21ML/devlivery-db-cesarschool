@@ -1,12 +1,12 @@
 // Mock Data: Categorias
 const categories = [
     { id: 1, name: "Lanches", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=200&auto=format&fit=crop" },
-    { id: 2, name: "Pizzas", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=200&auto=format&fit=crop" },
+    { id: 2, name: "Pizzas", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=200&auto=format&fit=crop" },
     { id: 3, name: "Japonesa", img: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=200&auto=format&fit=crop" },
     { id: 4, name: "Brasileira", img: "https://images.unsplash.com/photo-1633504581786-316c8002b1b9?q=80&w=200&auto=format&fit=crop" },
     { id: 5, name: "Saudável", img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=200&auto=format&fit=crop" },
     { id: 6, name: "Bebidas", img: "https://images.unsplash.com/photo-1544145945-f90425340c7e?q=80&w=200&auto=format&fit=crop" },
-    { id: 7, name: "Sobremesas", img: "https://images.unsplash.com/photo-1563805042-7684c8a9e9cb?q=80&w=200&auto=format&fit=crop" }
+    { id: 7, name: "Sobremesas", img: "https://images.unsplash.com/photo-1551024601-bec78aea704b?q=80&w=200&auto=format&fit=crop" }
 ];
 
 // Mock Data: Restaurantes
@@ -30,8 +30,8 @@ const restaurants = [
         rating: 4.6,
         time: "40-50 min",
         fee: "R$ 5,99",
-        logo: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=100&auto=format&fit=crop",
-        cover: "https://images.unsplash.com/photo-1604381536136-24a27c503adf?q=80&w=600&auto=format&fit=crop"
+        logo: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=100&auto=format&fit=crop",
+        cover: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?q=80&w=600&auto=format&fit=crop"
     },
     {
         id: 3,
@@ -95,10 +95,16 @@ function renderCategories() {
 }
 
 // Função para renderizar os restaurantes
-function renderRestaurants() {
+function renderRestaurants(data = restaurants) {
     const container = document.getElementById('restaurants-container');
+    container.innerHTML = ''; // Limpa antes de renderizar
     
-    restaurants.forEach(restaurant => {
+    if (data.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px 0;">Nenhum restaurante encontrado.</p>';
+        return;
+    }
+
+    data.forEach(restaurant => {
         const card = document.createElement('div');
         card.className = 'restaurant-card';
         card.innerHTML = `
@@ -129,17 +135,166 @@ function renderRestaurants() {
     });
 }
 
-// Inicializar a renderização quando o DOM carregar
-document.addEventListener('DOMContentLoaded', () => {
-    renderCategories();
-    renderRestaurants();
-    
-    // Simular interatividade nos botões de filtro
+// Lógica de Filtros e Busca
+function initFilters() {
     const filterBtns = document.querySelectorAll('.filter-btn');
+    const searchInput = document.querySelector('.search-bar input');
+
+    // Estado atual do filtro
+    let currentFilter = 'Todos';
+    let currentSearch = '';
+
+    function applyFilters() {
+        let filteredData = restaurants;
+
+        // Filtro por botões
+        if (currentFilter === 'Entrega Grátis') {
+            filteredData = filteredData.filter(r => r.fee === 'Grátis');
+        } else if (currentFilter === 'Melhor Avaliados') {
+            filteredData = filteredData.filter(r => r.rating >= 4.8);
+        } else if (currentFilter === 'Mais Rápidos') {
+            filteredData = filteredData.filter(r => parseInt(r.time.split('-')[0]) <= 30);
+        }
+
+        // Filtro por texto (Busca)
+        if (currentSearch.trim() !== '') {
+            const searchTerm = currentSearch.toLowerCase();
+            filteredData = filteredData.filter(r => 
+                r.name.toLowerCase().includes(searchTerm) || 
+                r.category.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        renderRestaurants(filteredData);
+    }
+
+    // Eventos de clique nos botões
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             filterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            currentFilter = btn.textContent.trim();
+            applyFilters();
         });
     });
+
+    // Evento de digitação na busca
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            currentSearch = e.target.value;
+            applyFilters();
+        });
+    }
+}
+
+function parseJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        return null;
+    }
+}
+
+// Função para deslogar
+function logout() {
+    localStorage.removeItem('token');
+    window.location.reload();
+}
+
+function checkAuthAndUpdateUI() {
+    const token = localStorage.getItem('token');
+    const navActions = document.getElementById('nav-actions');
+    const addressSelector = document.getElementById('address-selector');
+
+    if (!token) {
+        // --- USUÁRIO DESLOGADO ---
+        if (addressSelector) addressSelector.style.display = 'none';
+
+        if (navActions) {
+            navActions.innerHTML = `
+                <a href="login.html" class="btn-icon" aria-label="Entrar" style="text-decoration: none;">
+                    <i class="fa-regular fa-user"></i>
+                    <span>Entrar</span>
+                </a>
+                <button class="btn-icon cart-btn" aria-label="Carrinho">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="cart-badge">0</span>
+                </button>
+            `;
+        }
+        return;
+    }
+
+    // --- USUÁRIO LOGADO ---
+    const decoded = parseJwt(token);
+    if (!decoded) {
+        logout();
+        return;
+    }
+
+    // 1. Atualiza a Navbar: Tira o "Entrar", coloca "Perfil" e "Sair" (Aparece para AMBOS)
+    if (navActions) {
+        navActions.innerHTML = `
+            <a href="perfil.html" class="btn-icon" style="text-decoration: none;">
+                <i class="fa-solid fa-user"></i>
+                <span>Perfil</span>
+            </a>
+            <button class="btn-icon" onclick="logout()" style="color: var(--primary-color);">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Sair</span>
+            </button>
+            <button class="btn-icon cart-btn" aria-label="Carrinho">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span class="cart-badge">0</span>
+            </button>
+        `;
+    }
+
+    // 2. Lida com o bloco de endereço
+    const cpfDoUsuario = decoded.sub;
+    const role = decoded.role;
+
+    if (addressSelector) {
+        const addressInfo = addressSelector.querySelector('.address');
+
+        if (role === 'cliente') {
+            // MOSTRA o endereço se for cliente
+            addressSelector.style.display = 'flex';
+
+            fetch(`/api/clientes/buscar-endereco/${cpfDoUsuario}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Erro ao buscar endereço");
+                return res.json();
+            })
+            .then(endereco => {
+                if (addressInfo && endereco.rua) {
+                    addressInfo.textContent = `${endereco.rua}, ${endereco.numero || 'S/N'} - ${endereco.cidade}`;
+                }
+            })
+            .catch(err => {
+                console.error("Falha na busca:", err);
+                if (addressInfo) addressInfo.textContent = "Endereço não encontrado";
+            });
+
+        } else if (role === 'entregador') {
+            // ESCONDE o endereço se for entregador
+            addressSelector.style.display = 'none';
+        }
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderCategories();
+    renderRestaurants();
+    initFilters();
+    checkAuthAndUpdateUI();
 });
