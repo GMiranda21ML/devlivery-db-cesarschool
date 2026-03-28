@@ -32,23 +32,19 @@ public class SecurityConfigurations {
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
-                                "/swagger-ui/**"
+                                "/swagger-ui/**",
+                                "/",
+                                "/*.html",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/favicon.ico"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/clientes/cadastro").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/entregadores/cadastro").permitAll()
                         .requestMatchers("/api/clientes/**").hasRole("CLIENTE")
                         .requestMatchers("/api/entregadores/**").hasRole("ENTREGADOR")
-                        .requestMatchers(
-                                "/",
-                                "/index.html",
-                                "/login.html",
-                                "/cadastro.html",
-                                "/static/**",
-                                "/css/**",
-                                "/js/**",
-                                "/images/**"
-                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 // Coloca o nosso filtro de JWT antes do filtro padrão do Spring

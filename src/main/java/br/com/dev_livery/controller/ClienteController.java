@@ -66,4 +66,24 @@ public class ClienteController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @PatchMapping("/atualizar")
+    public ResponseEntity<String> atualizar(@RequestBody ClienteDTO dto) {
+        try {
+            clienteDAO.atualizar(dto);
+            return ResponseEntity.ok("Cliente atualizado com sucesso!");
+        } catch (SQLException e) {
+            return ResponseEntity.internalServerError().body("Erro: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{cpf}")
+    public ResponseEntity<String> deletar(@PathVariable String cpf) {
+        try {
+            clienteDAO.deletar(cpf);
+            return ResponseEntity.ok("Conta de cliente excluída.");
+        } catch (SQLException e) {
+            return ResponseEntity.internalServerError().body("Erro ao excluir: " + e.getMessage());
+        }
+    }
 }

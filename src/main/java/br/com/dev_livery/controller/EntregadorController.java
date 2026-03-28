@@ -51,4 +51,24 @@ public class EntregadorController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @PatchMapping("/atualizar")
+    public ResponseEntity<String> atualizar(@RequestBody EntregadorDTO dto) {
+        try {
+            entregadorDAO.atualizar(dto);
+            return ResponseEntity.ok("Entregador atualizado com sucesso!");
+        } catch (SQLException e) {
+            return ResponseEntity.internalServerError().body("Erro: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{cpf}")
+    public ResponseEntity<String> deletar(@PathVariable String cpf) {
+        try {
+            entregadorDAO.deletar(cpf);
+            return ResponseEntity.ok("Conta de entregador excluída.");
+        } catch (SQLException e) {
+            return ResponseEntity.internalServerError().body("Erro ao excluir: " + e.getMessage());
+        }
+    }
 }

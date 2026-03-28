@@ -1,5 +1,6 @@
 package br.com.dev_livery.dao;
 
+import br.com.dev_livery.dto.ClienteDTO;
 import br.com.dev_livery.dto.ClienteResponseDTO;
 import br.com.dev_livery.dto.EnderecoResponse;
 import org.springframework.stereotype.Repository;
@@ -134,42 +135,78 @@ public class ClienteDAO {
         return null;
     }
 
-    public void atualizarEndereco(String cpf, String rua, String numero, String bairro, String cidade, String cep) throws SQLException {
-        String sql = "UPDATE CLIENTE SET RUA = ?, NUMERO = ?, BAIRRO = ?, CIDADE = ?, CEP = ? WHERE CPF = ?";
+// MÉTODOS PARA ADICIONAR NO ClienteDAO.java
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement cliente = conn.prepareStatement(sql)) {
+    public void atualizar(ClienteDTO dto) throws SQLException {
+        String sqlUsuario = "UPDATE USUARIO SET NOME = ?, EMAIL = ? WHERE CPF = ?";
+        String sqlCliente = "UPDATE CLIENTE SET RUA = ?, CIDADE = ?, NUMERO = ?, BAIRRO = ?, CEP = ? WHERE CPF = ?";
+        String sqlDelTelefone = "DELETE FROM TELEFONE WHERE CPF = ?";
+        String sqlInsTelefone = "INSERT INTO TELEFONE (CPF, NUMERO) VALUES (?, ?)";
 
-            cliente.setString(1, rua);
-            cliente.setString(2, numero);
-            cliente.setString(3, bairro);
-            cliente.setString(4, cidade);
-            cliente.setString(5, cep);
-            cliente.setString(6, cpf);
-            cliente.executeUpdate();
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement stmtU = conn.prepareStatement(sqlUsuario);
+                 PreparedStatement stmtC = conn.prepareStatement(sqlCliente);
+                 PreparedStatement stmtDelT = conn.prepareStatement(sqlDelTelefone);
+                 PreparedStatement stmtInsT = conn.prepareStatement(sqlInsTelefone)) {
+
+                // 1. Atualiza Usuário
+                stmtU.setString(1, dto.nome());
+                stmtU.setString(2, dto.email());
+                stmtU.setString(3, dto.cpf());
+                stmtU.executeUpdate();
+
+                // 2. Atualiza Cliente
+                stmtC.setString(1, dto.rua());
+                stmtC.setString(2, dto.cidade());
+                stmtC.setString(3, dto.numero());
+                stmtC.setString(4, dto.bairro());
+                stmtC.setString(5, dto.cep());
+                stmtC.setString(6, dto.cpf());
+                stmtC.executeUpdate();
+
+                // 3. Atualiza Telefone (Deleta o antigo e insere o novo)
+                stmtDelT.setString(1, dto.cpf());
+                stmtDelT.executeUpdate();
+
+                if (dto.telefone() != null && !dto.telefone().isBlank()) {
+                    stmtInsT.setString(1, dto.cpf());
+                    stmtInsT.setString(2, dto.telefone());
+                    stmtInsT.executeUpdate();
+                }
+
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
         }
     }
 
     public void deletar(String cpf) throws SQLException {
-        String sqlCliente = "DELETE FROM CLIENTE WHERE CPF = ?";
+        String sqlLimpaConvite = "UPDATE CLIENTE SET CONVIDADO = NULL WHERE CONVIDADO = ?";
         String sqlTelefone = "DELETE FROM TELEFONE WHERE CPF = ?";
+        String sqlCliente = "DELETE FROM CLIENTE WHERE CPF = ?";
         String sqlUsuario = "DELETE FROM USUARIO WHERE CPF = ?";
 
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
+            try (PreparedStatement stmtLimpa = conn.prepareStatement(sqlLimpaConvite);
+                 PreparedStatement stmtTel = conn.prepareStatement(sqlTelefone);
+                 PreparedStatement stmtCli = conn.prepareStatement(sqlCliente);
+                 PreparedStatement stmtUsu = conn.prepareStatement(sqlUsuario)) {
 
-            try (PreparedStatement cliente = conn.prepareStatement(sqlCliente);
-                 PreparedStatement numTelefone = conn.prepareStatement(sqlTelefone);
-                 PreparedStatement usuario = conn.prepareStatement(sqlUsuario)) {
+                stmtLimpa.setString(1, cpf);
+                stmtLimpa.executeUpdate();
 
-                cliente.setString(1, cpf);
-                cliente.executeUpdate();
+                stmtTel.setString(1, cpf);
+                stmtTel.executeUpdate();
 
-                numTelefone.setString(1, cpf);
-                numTelefone.executeUpdate();
+                stmtCli.setString(1, cpf);
+                stmtCli.executeUpdate();
 
-                usuario.setString(1, cpf);
-                usuario.executeUpdate();
+                stmtUsu.setString(1, cpf);
+                stmtUsu.executeUpdate();
 
                 conn.commit();
             } catch (SQLException e) {

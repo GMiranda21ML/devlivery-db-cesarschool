@@ -1,5 +1,6 @@
 package br.com.dev_livery.dao;
 
+import br.com.dev_livery.dto.EntregadorDTO;
 import br.com.dev_livery.dto.EntregadorResponseDTO;
 import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
@@ -91,41 +92,66 @@ public class EntregadorDAO {
         }
         return null;
     }
-    
-    // atualizar depois para poder atualizar o telefone tambem!
-    public void atualizar(String cpf, String novoVeiculo, String novaPlaca) throws SQLException {
-        String sql = "UPDATE ENTREGADOR SET VEICULO = ?, PLACA = ? WHERE CPF = ?";
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement entregador = conn.prepareStatement(sql)) {
+    public void atualizar(EntregadorDTO dto) throws SQLException {
+        String sqlUsuario = "UPDATE USUARIO SET NOME = ?, EMAIL = ? WHERE CPF = ?";
+        String sqlEntregador = "UPDATE ENTREGADOR SET VEICULO = ?, PLACA = ? WHERE CPF = ?";
+        String sqlDelTelefone = "DELETE FROM TELEFONE WHERE CPF = ?";
+        String sqlInsTelefone = "INSERT INTO TELEFONE (CPF, NUMERO) VALUES (?, ?)";
 
-            entregador.setString(1, novoVeiculo);
-            entregador.setString(2, novaPlaca);
-            entregador.setString(3, cpf);
-            entregador.executeUpdate();
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement stmtU = conn.prepareStatement(sqlUsuario);
+                 PreparedStatement stmtE = conn.prepareStatement(sqlEntregador);
+                 PreparedStatement stmtDelT = conn.prepareStatement(sqlDelTelefone);
+                 PreparedStatement stmtInsT = conn.prepareStatement(sqlInsTelefone)) {
+
+                stmtU.setString(1, dto.nome());
+                stmtU.setString(2, dto.email());
+                stmtU.setString(3, dto.cpf());
+                stmtU.executeUpdate();
+
+                stmtE.setString(1, dto.veiculo());
+                stmtE.setString(2, dto.placa());
+                stmtE.setString(3, dto.cpf());
+                stmtE.executeUpdate();
+
+                stmtDelT.setString(1, dto.cpf());
+                stmtDelT.executeUpdate();
+
+                if (dto.telefone() != null && !dto.telefone().isBlank()) {
+                    stmtInsT.setString(1, dto.cpf());
+                    stmtInsT.setString(2, dto.telefone());
+                    stmtInsT.executeUpdate();
+                }
+
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
         }
     }
-    
+
     public void deletar(String cpf) throws SQLException {
-        String sqlEntregador = "DELETE FROM ENTREGADOR WHERE CPF = ?";
         String sqlTelefone = "DELETE FROM TELEFONE WHERE CPF = ?";
+        String sqlEntregador = "DELETE FROM ENTREGADOR WHERE CPF = ?";
         String sqlUsuario = "DELETE FROM USUARIO WHERE CPF = ?";
 
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
+            try (PreparedStatement stmtTel = conn.prepareStatement(sqlTelefone);
+                 PreparedStatement stmtEnt = conn.prepareStatement(sqlEntregador);
+                 PreparedStatement stmtUsu = conn.prepareStatement(sqlUsuario)) {
 
-            try (PreparedStatement entregador = conn.prepareStatement(sqlEntregador);
-                 PreparedStatement numTelefone = conn.prepareStatement(sqlTelefone);
-                 PreparedStatement usuario = conn.prepareStatement(sqlUsuario)) {
+                stmtTel.setString(1, cpf);
+                stmtTel.executeUpdate();
 
-                entregador.setString(1, cpf);
-                entregador.executeUpdate();
+                stmtEnt.setString(1, cpf);
+                stmtEnt.executeUpdate();
 
-                numTelefone.setString(1, cpf);
-                numTelefone.executeUpdate();
-
-                usuario.setString(1, cpf);
-                usuario.executeUpdate();
+                stmtUsu.setString(1, cpf);
+                stmtUsu.executeUpdate();
 
                 conn.commit();
             } catch (SQLException e) {
