@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Dev-livery</title>
+    <link rel="stylesheet" href="css/auth.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Voltar para Home</a>
+            
+            <div class="logo">
+                <i class="fa-solid fa-motorcycle"></i>
+                <h1>Dev-livery</h1>
+            </div>
+
+            <h2>Bem-vindo de volta</h2>
+            <p class="subtitle">Faça login para continuar</p>
+
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="setRole('cliente')">Cliente</button>
+                <button class="tab-btn" onclick="setRole('entregador')">Entregador</button>
+            </div>
+
+            <form action="index.html" class="auth-form">
+                <input type="hidden" id="role" name="role" value="cliente">
+                
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" placeholder="Seu e-mail cadastrado" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" placeholder="Sua senha secreta" required>
+                </div>
+
+                <div class="forgot-password">
+                    <a href="#">Esqueceu a senha?</a>
+                </div>
+
+                <button type="submit" class="btn-primary btn-block">Entrar</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Ainda não tem uma conta? <a href="cadastro.html">Cadastre-se</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/auth.js"></script>
+</body>
+</html>
