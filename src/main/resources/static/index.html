@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev-livery - O Seu App de Delivery</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Cabeçalho (Navbar) -->
+    <header class="navbar">
+        <div class="container navbar-content">
+            <div class="logo">
+                <i class="fa-solid fa-motorcycle"></i>
+                <h1>Dev-livery</h1>
+            </div>
+            
+            <div class="address-selector">
+                <i class="fa-solid fa-location-dot"></i>
+                <div class="address-info">
+                    <span class="label">Entregar em</span>
+                    <span class="address">Rua dos Bobos, 0 - Recife, PE</span>
+                </div>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Busque por item ou loja">
+            </div>
+
+            <div class="nav-actions">
+                <button class="btn-icon" aria-label="Entrar">
+                    <i class="fa-regular fa-user"></i>
+                    <span>Entrar</span>
+                </button>
+                <button class="btn-icon cart-btn" aria-label="Carrinho">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="cart-badge">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Banner Promocional -->
+        <section class="hero-banner">
+            <div class="banner-content">
+                <h2>Fome de código?</h2>
+                <p>Peça agora e ganhe <strong>Entrega Grátis</strong> no primeiro pedido!</p>
+                <button class="btn-primary">Ver Restaurantes</button>
+            </div>
+            <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop" alt="Comida Deliciosa" class="banner-img">
+        </section>
+
+        <!-- Categorias -->
+        <section class="categories-section">
+            <h3>Categorias</h3>
+            <div class="categories-grid" id="categories-container">
+                <!-- Injetado via JS -->
+            </div>
+        </section>
+
+        <!-- Restaurantes -->
+        <section class="restaurants-section">
+            <h3>Lojas e Restaurantes</h3>
+            <div class="filters">
+                <button class="filter-btn active">Todos</button>
+                <button class="filter-btn">Entrega Grátis</button>
+                <button class="filter-btn">Melhor Avaliados</button>
+                <button class="filter-btn">Mais Rápidos</button>
+            </div>
+            
+            <div class="restaurants-grid" id="restaurants-container">
+                <!-- Injetado via JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Rodapé -->
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <h2>Dev-livery</h2>
+                <p>O melhor app para devs famintos.</p>
+            </div>
+            <div class="footer-links">
+                <div class="link-column">
+                    <h4>Descubra</h4>
+                    <a href="#">Restaurantes</a>
+                    <a href="#">Categorias</a>
+                    <a href="#">Promoções</a>
+                </div>
+                <div class="link-column">
+                    <h4>Parceiros</h4>
+                    <a href="#">Cadastre seu Restaurante</a>
+                    <a href="#">Seja um Entregador</a>
+                </div>
+                <div class="link-column">
+                    <h4>Sobre</h4>
+                    <a href="#">Termos de Uso</a>
+                    <a href="#">Privacidade</a>
+                    <a href="#">Ajuda</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Dev-livery. Projeto Banco de Dados.</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
