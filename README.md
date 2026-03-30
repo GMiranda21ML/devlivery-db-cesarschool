@@ -4,22 +4,6 @@ Uma **Aplicação Web** desenvolvida para o gerenciamento de um sistema de deliv
 
 O projeto integra uma API no backend com uma interface interativa no frontend, tendo como objetivo, mostrar as diversas interações com o banco de dados.
 
-## 🛠️ Tecnologias Utilizadas
-
-Este projeto foi desenvolvido utilizando as seguintes tecnologias:
-
-**Backend:**
-* **Java & Spring Boot** (Web, Data JDBC, Security)
-* **MySQL** (Banco de Dados Relacional)
-* **Flyway** (Migrations para versionamento do banco)
-* **JWT (JSON Web Token)** (Autenticação e segurança)
-* **Swagger / OpenAPI** (Documentação dos endpoints)
-* **Maven** (Gerenciamento de dependências)
-
-**Frontend:**
-* **HTML5, CSS3 e JavaScript** (Interfaces dinâmicas e responsivas)
-* **Integração assíncrona** (Consumo da API via Fetch/AJAX)
-
 ## ⚙️ Configuração e Execução
 
 ### 1. Pré-requisitos
