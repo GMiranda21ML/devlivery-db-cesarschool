@@ -9,7 +9,7 @@ O projeto integra uma API no backend com uma interface interativa no frontend, t
 Este projeto foi desenvolvido utilizando as seguintes tecnologias:
 
 **Backend:**
-* **Java & Spring Boot** (Web, Data JPA, Security)
+* **Java & Spring Boot** (Web, Data JDBC, Security)
 * **MySQL** (Banco de Dados Relacional)
 * **Flyway** (Migrations para versionamento do banco)
 * **JWT (JSON Web Token)** (Autenticação e segurança)
