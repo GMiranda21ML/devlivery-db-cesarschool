@@ -27,9 +27,9 @@ SENHA_JWT={sua-chave-secreta-jwt}
 
 ```
 ### 3. Rodar a aplicação
-Depois de realizar as mudanças corretamente no arquivo .env, agora basta rodar o arquivo DevLiveryApplication.java
+Depois de realizar as mudanças corretamente no arquivo .env, você deve rodar o arquivo DevLiveryApplication.java
 que possui o caminho devlivery-db-cesarschool/src/main/java/DevLiveryApplication.java.
 
-Depois disso basta rodar localmente o site:
+Agora basta rodar localmente o site:
 
 <img width="1903" height="979" alt="image" src="https://github.com/user-attachments/assets/d2909cc8-6217-4596-8a32-6af94b4e81bc" />
