@@ -1,191 +1,218 @@
-// Mock Data: Categorias
-const categories = [
-    { id: 1, name: "Lanches", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=200&auto=format&fit=crop" },
-    { id: 2, name: "Pizzas", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=200&auto=format&fit=crop" },
-    { id: 3, name: "Japonesa", img: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=200&auto=format&fit=crop" },
-    { id: 4, name: "Brasileira", img: "https://images.unsplash.com/photo-1633504581786-316c8002b1b9?q=80&w=200&auto=format&fit=crop" },
-    { id: 5, name: "Saudável", img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=200&auto=format&fit=crop" },
-    { id: 6, name: "Bebidas", img: "https://images.unsplash.com/photo-1544145945-f90425340c7e?q=80&w=200&auto=format&fit=crop" },
-    { id: 7, name: "Sobremesas", img: "https://images.unsplash.com/photo-1551024601-bec78aea704b?q=80&w=200&auto=format&fit=crop" }
-];
+let allRestaurants = [];
+let currentFilter = 'Todos';
+let currentSearch = '';
+let currentQuickFilter = 'todos';
+let advancedFilters = { minNota: 0, maxFrete: 999 };
 
-// Mock Data: Restaurantes
-const restaurants = [
-    {
-        id: 1,
-        cnpj: "12.345.678/0001-90",
-        name: "Byte Burguer",
-        category: "Lanches",
-        rating: 4.8,
-        time: "30-40 min",
-        fee: "Grátis",
-        logo: "https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=100&auto=format&fit=crop",
-        cover: "https://images.unsplash.com/photo-1586816001966-79b736744398?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-        id: 2,
-        cnpj: "98.765.432/0001-10",
-        name: "Pizza do Dev",
-        category: "Pizzas",
-        rating: 4.6,
-        time: "40-50 min",
-        fee: "R$ 5,99",
-        logo: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=100&auto=format&fit=crop",
-        cover: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-        id: 3,
-        cnpj: "11.222.333/0001-44",
-        name: "Sushi Array",
-        category: "Japonesa",
-        rating: 4.9,
-        time: "45-60 min",
-        fee: "R$ 8,00",
-        logo: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=100&auto=format&fit=crop",
-        cover: "https://images.unsplash.com/photo-1553621042-f6e147245754?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-        id: 4,
-        cnpj: "55.666.777/0001-88",
-        name: "Commit Café & Lanches",
-        category: "Lanches",
-        rating: 4.5,
-        time: "20-30 min",
-        fee: "R$ 3,50",
-        logo: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?q=80&w=100&auto=format&fit=crop",
-        cover: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-        id: 5,
-        cnpj: "99.888.777/0001-66",
-        name: "Sintaxe Saudável",
-        category: "Saudável",
-        rating: 4.7,
-        time: "25-35 min",
-        fee: "Grátis",
-        logo: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=100&auto=format&fit=crop",
-        cover: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-        id: 6,
-        cnpj: "33.444.555/0001-22",
-        name: "Churrasco Orientado a Objetos",
-        category: "Brasileira",
-        rating: 4.8,
-        time: "50-70 min",
-        fee: "R$ 10,00",
-        logo: "https://images.unsplash.com/photo-1633504581786-316c8002b1b9?q=80&w=100&auto=format&fit=crop",
-        cover: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=600&auto=format&fit=crop"
+async function carregarCategorias() {
+    try {
+        const response = await fetch('/api/categorias');
+        if (response.ok) {
+            const categoriasDB = await response.json();
+            renderCategories(categoriasDB); // <-- Corrigido aqui (estava renderFilterButtons)
+        }
+    } catch (error) {
+        console.error('Erro ao buscar categorias do banco:', error);
     }
-];
+}
 
-// Função para renderizar as categorias
-function renderCategories() {
+function renderCategories(categorias) {
     const container = document.getElementById('categories-container');
-    
-    categories.forEach(category => {
+    if (!container) return;
+    container.innerHTML = '';
+
+    categorias.forEach(category => {
         const card = document.createElement('div');
         card.className = 'category-card';
+        card.style.cursor = 'pointer';
+
+        // Puxa a imagem local baseada no ID (ex: cat_1.jpg, cat_2.jpg)
+        const bgImage = `/images/cat/cat_${category.cdCategoria}.jpg`;
+
+        card.onclick = () => {
+            currentSearch = '';
+            const searchInput = document.querySelector('.search-bar input');
+            if(searchInput) searchInput.value = '';
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.textContent.trim() === category.nome) btn.classList.add('active');
+            });
+
+            carregarRestaurantes(category.nome);
+        };
+
+        // O 'onerror' garante que se não achar a foto na pasta, carrega uma cinza padrão
         card.innerHTML = `
-            <img src="${category.img}" alt="${category.name}" class="category-img">
-            <span class="category-name">${category.name}</span>
+            <img src="${bgImage}" alt="${category.nome}" class="category-img" onerror="this.src='https://via.placeholder.com/200?text=Sem+Foto'">
+            <span class="category-name">${category.nome}</span>
         `;
         container.appendChild(card);
     });
 }
 
-// Função para renderizar os restaurantes
-function renderRestaurants(data = restaurants) {
+async function carregarRestaurantes(categoria = 'Todos') {
+    try {
+        // Decide qual rota do Spring Boot chamar
+        let url = '/api/restaurantes';
+        if (categoria !== 'Todos') {
+            url = `/api/restaurantes/categoria/${categoria}`;
+        }
+
+        const response = await fetch(url);
+
+        if (response.ok) {
+            allRestaurants = await response.json(); // Salva os dados na memória
+            applyFilters(); // Aplica a filtragem da barra de pesquisa por cima
+        } else {
+            renderRestaurants([]);
+        }
+    } catch (error) {
+        console.error('Erro de conexão com o backend:', error);
+        renderRestaurants([]);
+    }
+}
+
+function renderRestaurants(restaurantes) {
     const container = document.getElementById('restaurants-container');
-    container.innerHTML = ''; // Limpa antes de renderizar
-    
-    if (data.length === 0) {
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!restaurantes || restaurantes.length === 0) {
         container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px 0;">Nenhum restaurante encontrado.</p>';
         return;
     }
 
-    data.forEach(restaurant => {
+    restaurantes.forEach((restaurant) => {
+        const id = restaurant.cdRestaurante;
+        const bgImage = `/images/rest/rest_${id}.jpg`;
+        const nomeSeguro = restaurant.nome || 'Restaurante';
+        const sigla = nomeSeguro.substring(0, 2).toUpperCase();
+
+        const notaFormatada = restaurant.nota ? restaurant.nota.toFixed(1) : '5.0';
+        const tempoFormatado = restaurant.tempoEntrega ? `${restaurant.tempoEntrega} min` : '30-40 min';
+
+        let freteTexto = restaurant.taxaEntrega > 0 ? `R$ ${restaurant.taxaEntrega.toFixed(2).replace('.', ',')}` : 'Grátis';
+        let freteStyle = restaurant.taxaEntrega > 0 ? 'color: var(--text-color); font-weight: 500' : 'color: #1da55a; font-weight: 600';
+
         const card = document.createElement('div');
         card.className = 'restaurant-card';
+        card.onclick = () => window.location.href = `restaurante.html?cdRestaurante=${id}`;
         card.innerHTML = `
-            <img src="${restaurant.cover}" alt="Capa ${restaurant.name}" class="restaurant-cover">
+            <img src="${bgImage}" class="restaurant-cover" onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600&auto=format&fit=crop'">
             <div class="restaurant-info">
-                <img src="${restaurant.logo}" alt="Logo ${restaurant.name}" class="restaurant-logo">
+                <div class="restaurant-logo" style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-color), #ff6b6b); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <span style="color: white; font-weight: 700; font-size: 18px;">${sigla}</span>
+                </div>
                 <div class="restaurant-details">
                     <div class="restaurant-header">
-                        <h4>${restaurant.name}</h4>
-                        <div class="rating">
-                            <i class="fa-solid fa-star"></i>
-                            <span>${restaurant.rating}</span>
-                        </div>
+                        <h4>${nomeSeguro}</h4>
+                        <div class="rating"><i class="fa-solid fa-star"></i> <span>${notaFormatada}</span></div>
                     </div>
                     <div class="restaurant-meta">
-                        <span>${restaurant.category}</span>
+                        <span>${restaurant.bairro || 'Delivery'}</span>
                         <i class="fa-solid fa-circle bullet"></i>
-                        <span>${restaurant.time}</span>
+                        <span>${tempoFormatado}</span>
                         <i class="fa-solid fa-circle bullet"></i>
-                        <span style="color: ${restaurant.fee === 'Grátis' ? '#1da55a' : 'inherit'}; font-weight: ${restaurant.fee === 'Grátis' ? '600' : 'normal'}">
-                            ${restaurant.fee}
-                        </span>
+                        <span style="${freteStyle}">${freteTexto}</span>
                     </div>
                 </div>
-            </div>
-        `;
+            </div>`;
         container.appendChild(card);
     });
 }
 
-// Lógica de Filtros e Busca
+
 function initFilters() {
-    const filterBtns = document.querySelectorAll('.filter-btn');
+    const quickBtns = document.querySelectorAll('.quick-filter');
     const searchInput = document.querySelector('.search-bar input');
 
-    // Estado atual do filtro
-    let currentFilter = 'Todos';
-    let currentSearch = '';
-
-    function applyFilters() {
-        let filteredData = restaurants;
-
-        // Filtro por botões
-        if (currentFilter === 'Entrega Grátis') {
-            filteredData = filteredData.filter(r => r.fee === 'Grátis');
-        } else if (currentFilter === 'Melhor Avaliados') {
-            filteredData = filteredData.filter(r => r.rating >= 4.8);
-        } else if (currentFilter === 'Mais Rápidos') {
-            filteredData = filteredData.filter(r => parseInt(r.time.split('-')[0]) <= 30);
-        }
-
-        // Filtro por texto (Busca)
-        if (currentSearch.trim() !== '') {
-            const searchTerm = currentSearch.toLowerCase();
-            filteredData = filteredData.filter(r => 
-                r.name.toLowerCase().includes(searchTerm) || 
-                r.category.toLowerCase().includes(searchTerm)
-            );
-        }
-
-        renderRestaurants(filteredData);
-    }
-
-    // Eventos de clique nos botões
-    filterBtns.forEach(btn => {
+    // 1. Filtros Rápidos (Entrega Grátis, Melhores Avaliados)
+    quickBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            filterBtns.forEach(b => b.classList.remove('active'));
+            quickBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            currentFilter = btn.textContent.trim();
+
+            // Pega o que está escrito no 'data-filter' do HTML (ex: "gratis")
+            currentQuickFilter = btn.dataset.filter;
             applyFilters();
         });
     });
 
-    // Evento de digitação na busca
+    // 2. Barra de Pesquisa
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
-            currentSearch = e.target.value;
+            currentSearch = e.target.value.toLowerCase();
             applyFilters();
         });
     }
+
+    // 3. Lógica do Modal de Filtros Avançados
+    const modal = document.getElementById('modal-filtros');
+    const btnOpen = document.getElementById('btn-filtros-avancados');
+    const btnClose = document.querySelector('.close-modal');
+    const btnApply = document.getElementById('aplicar-filtros-avancados');
+
+    const rangeNota = document.getElementById('filtro-nota');
+    const labelNota = document.getElementById('valor-nota');
+    const rangeFrete = document.getElementById('filtro-frete');
+    const labelFrete = document.getElementById('valor-frete');
+
+    if(btnOpen && modal) {
+        // Abrir/Fechar Modal
+        btnOpen.onclick = () => modal.style.display = 'flex';
+        btnClose.onclick = () => modal.style.display = 'none';
+        window.onclick = (e) => { if(e.target === modal) modal.style.display = 'none'; };
+
+        // Atualizar textos dos sliders em tempo real
+        rangeNota.oninput = () => labelNota.textContent = rangeNota.value > 0 ? `Acima de ${rangeNota.value}` : 'Todas';
+        rangeFrete.oninput = () => labelFrete.textContent = rangeFrete.value < 30 ? `Até R$ ${rangeFrete.value},00` : 'Qualquer valor';
+
+        // Aplicar botão do modal
+        btnApply.onclick = () => {
+            advancedFilters.minNota = parseFloat(rangeNota.value);
+            advancedFilters.maxFrete = parseFloat(rangeFrete.value);
+
+            // Se usou filtro avançado, tira o highlight dos filtros rápidos para não confundir
+            quickBtns.forEach(b => b.classList.remove('active'));
+            currentQuickFilter = 'todos';
+
+            modal.style.display = 'none';
+            applyFilters();
+        };
+    }
 }
+
+function applyFilters() {
+    let filtrados = allRestaurants;
+
+    // 1. Filtro da Barra de Pesquisa (Texto)
+    if (currentSearch) {
+        filtrados = filtrados.filter(rest =>
+            rest.nome && rest.nome.toLowerCase().includes(currentSearch)
+        );
+    }
+
+    // 2. Filtros Rápidos (Botões)
+    if (currentQuickFilter === 'gratis') {
+        filtrados = filtrados.filter(rest => rest.taxaEntrega === 0);
+    } else if (currentQuickFilter === 'melhores') {
+        // Supondo que "melhores" seja nota >= 4.5
+        filtrados = filtrados.filter(rest => rest.nota >= 4.5);
+    }
+
+    // 3. Filtros Avançados (Modal)
+    if (advancedFilters.minNota > 0) {
+        filtrados = filtrados.filter(rest => rest.nota >= advancedFilters.minNota);
+    }
+    if (advancedFilters.maxFrete < 999) {
+        filtrados = filtrados.filter(rest => rest.taxaEntrega <= advancedFilters.maxFrete);
+    }
+
+    // Após filtrar a lista, atualiza a tela
+    renderRestaurants(filtrados);
+}
+
 
 function parseJwt(token) {
     try {
@@ -203,6 +230,7 @@ function parseJwt(token) {
 // Função para deslogar
 function logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('cart');
     window.location.reload();
 }
 
@@ -221,7 +249,7 @@ function checkAuthAndUpdateUI() {
                     <i class="fa-regular fa-user"></i>
                     <span>Entrar</span>
                 </a>
-                <button class="btn-icon cart-btn" aria-label="Carrinho">
+                <button class="btn-icon cart-btn" onclick="openCart()" aria-label="Carrinho">
                     <i class="fa-solid fa-cart-shopping"></i>
                     <span class="cart-badge">0</span>
                 </button>
@@ -237,9 +265,24 @@ function checkAuthAndUpdateUI() {
         return;
     }
 
+    // 2. Lida com o bloco de endereço
+    const cpfDoUsuario = decoded.sub;
+    const role = decoded.role;
+
     // 1. Atualiza a Navbar: Tira o "Entrar", coloca "Perfil" e "Sair" (Aparece para AMBOS)
     if (navActions) {
-        navActions.innerHTML = `
+        let navContent = '';
+        
+        if (role === 'parceiro') {
+            navContent += `
+                <a href="criar-restaurante.html" class="btn-icon" style="text-decoration: none; color: #1da55a;">
+                    <i class="fa-solid fa-store"></i>
+                    <span>Criar Restaurante</span>
+                </a>
+            `;
+        }
+        
+        navContent += `
             <a href="perfil.html" class="btn-icon" style="text-decoration: none;">
                 <i class="fa-solid fa-user"></i>
                 <span>Perfil</span>
@@ -248,16 +291,19 @@ function checkAuthAndUpdateUI() {
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Sair</span>
             </button>
-            <button class="btn-icon cart-btn" aria-label="Carrinho">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span class="cart-badge">0</span>
-            </button>
         `;
+        
+        if (role === 'cliente') {
+            navContent += `
+                <button class="btn-icon cart-btn" onclick="openCart()" aria-label="Carrinho">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="cart-badge">${getCartCount()}</span>
+                </button>
+            `;
+        }
+        
+        navActions.innerHTML = navContent;
     }
-
-    // 2. Lida com o bloco de endereço
-    const cpfDoUsuario = decoded.sub;
-    const role = decoded.role;
 
     if (addressSelector) {
         const addressInfo = addressSelector.querySelector('.address');
@@ -291,10 +337,53 @@ function checkAuthAndUpdateUI() {
     }
 }
 
+function initCategoryScroll() {
+    const container = document.getElementById('categories-container');
+    const leftBtn = document.getElementById('scroll-left');
+    const rightBtn = document.getElementById('scroll-right');
+
+    if (!container || !leftBtn || !rightBtn) return;
+
+    // Quantidade de pixels que a tela vai pular a cada clique
+    const scrollAmount = 350;
+
+    leftBtn.addEventListener('click', () => {
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    });
+
+    rightBtn.addEventListener('click', () => {
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    });
+
+    // Mostra/Esconde a seta da esquerda dependendo de onde o scroll está
+    container.addEventListener('scroll', () => {
+        if (container.scrollLeft > 10) {
+            leftBtn.style.display = 'flex';
+        } else {
+            leftBtn.style.display = 'none';
+        }
+    });
+
+    // Inicia escondendo a seta da esquerda (já que começa no pixel 0)
+    leftBtn.style.display = 'none';
+}
+
+// Cart functions
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+function getCartCount() {
+    return cart.reduce((sum, item) => sum + item.quantidade, 0);
+}
+
+function openCart() {
+    window.location.href = 'checkout.html';
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
-    renderCategories();
-    renderRestaurants();
+    carregarCategorias();
+    carregarRestaurantes();
     initFilters();
     checkAuthAndUpdateUI();
+    initCategoryScroll();
 });

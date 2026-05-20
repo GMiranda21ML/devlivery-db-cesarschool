@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Restaurante - Dev-livery</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/painel.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="container navbar-content">
+            <div class="navbar-left">
+                <div class="logo">
+                    <i class="fa-solid fa-motorcycle"></i>
+                    <h1>Dev-livery</h1>
+                </div>
+                <a href="index.html" class="back-link" aria-label="Voltar para Home">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Voltar para Home</span>
+                </a>
+            </div>
+            <div class="nav-actions" id="nav-actions">
+                <button class="btn-icon" onclick="logout()">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Sair</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container painel-main">
+        <section class="categories-section">
+            <h2>Painel do Restaurante</h2>
+        </section>
+
+        <section class="categories-section">
+            <h3>Estatísticas</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Faturamento Total</h4>
+                    <div class="value" id="faturamento-valor">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Pedidos Pendentes</h4>
+                    <div class="value" id="pedidos-pendentes-qtd">0</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="categories-section">
+            <div class="section-header">
+                <h3>Pedidos Pendentes</h3>
+            </div>
+            <div id="pedidos-pendentes-container">
+                <p>Carregando pedidos...</p>
+            </div>
+        </section>
+
+        <section class="categories-section">
+            <div class="section-header">
+                <h3>Produtos</h3>
+                <button class="btn-primary" onclick="openProdutoModal()">
+                    <i class="fa-solid fa-plus"></i> Novo Produto
+                </button>
+            </div>
+            <div id="produtos-container">
+                <p>Carregando produtos...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <h2>Dev-livery</h2>
+                <p>O melhor app para devs famintos.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal" id="produto-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Novo Produto</h3>
+                <button class="btn-icon" onclick="closeProdutoModal()" style="border: none; background: none; cursor: pointer;">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <form id="produto-form">
+                <input type="hidden" id="produto-id">
+                <div class="form-group">
+                    <label for="produto-nome">Nome</label>
+                    <input type="text" id="produto-nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="produto-descricao">Descrição</label>
+                    <textarea id="produto-descricao" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="produto-preco">Preço</label>
+                    <input type="number" step="0.01" id="produto-preco" required>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Salvar Produto</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let restauranteCd = null;
+
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('cart');
+            window.location.href = 'index.html';
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        }
+
+        async function loadRestaurante() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const decoded = parseJwt(token);
+            if (!decoded) {
+                logout();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/restaurantes/${decoded.sub}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const restaurante = await response.json();
+                    restauranteCd = restaurante.cdRestaurante;
+                    loadPedidos();
+                    loadFaturamento();
+                    loadProdutos();
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        async function loadPedidos() {
+            const token = localStorage.getItem('token');
+            const container = document.getElementById('pedidos-pendentes-container');
+            const qtdContainer = document.getElementById('pedidos-pendentes-qtd');
+
+            try {
+                const response = await fetch(`/api/pedidos/restaurante/${restauranteCd}/pendentes`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const pedidos = await response.json();
+                    qtdContainer.textContent = pedidos.length;
+
+                    if (pedidos.length === 0) {
+                        container.innerHTML = '<p>Nenhum pedido pendente.</p>';
+                        return;
+                    }
+
+                    container.innerHTML = pedidos.map(pedido => `
+                        <div class="pedido-card">
+                            <div class="pedido-header">
+                                <h4>Pedido #${pedido.cdPedido}</h4>
+                                <span style="font-weight: 700; color: var(--primary-color);">${formatCurrency(pedido.valorTotal)}</span>
+                            </div>
+                            <p style="color: var(--text-muted); margin-bottom: 8px;">Cliente: ${pedido.cpfCliente}</p>
+                            <p style="color: var(--text-muted); margin-bottom: 12px;">Data: ${pedido.data}</p>
+                            <div class="pedido-actions">
+                                <button class="btn-small btn-success" onclick="atualizarStatusPedido(${pedido.cdPedido}, 'Aceito')">Aceitar</button>
+                                <button class="btn-small btn-warning" onclick="atualizarStatusPedido(${pedido.cdPedido}, 'Pronto para Entrega')">Pronto para Entrega</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                container.innerHTML = '<p>Erro ao carregar pedidos.</p>';
+            }
+        }
+
+        async function atualizarStatusPedido(cdPedido, status) {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`/api/pedidos/${cdPedido}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: status
+                });
+
+                if (response.ok) {
+                    loadPedidos();
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        async function loadFaturamento() {
+            const token = localStorage.getItem('token');
+            const container = document.getElementById('faturamento-valor');
+
+            try {
+                const response = await fetch(`/api/pedidos/restaurante/${restauranteCd}/faturamento`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const faturamento = await response.json();
+                    container.textContent = formatCurrency(faturamento);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                container.textContent = 'Erro';
+            }
+        }
+
+        async function loadProdutos() {
+            const token = localStorage.getItem('token');
+            const container = document.getElementById('produtos-container');
+
+            try {
+                const response = await fetch(`/api/produtos/restaurante/${restauranteCd}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const produtos = await response.json();
+                    if (produtos.length === 0) {
+                        container.innerHTML = '<p>Nenhum produto cadastrado.</p>';
+                        return;
+                    }
+
+                    container.innerHTML = produtos.map(produto => `
+                        <div class="produto-item">
+                            <div>
+                                <h4 style="margin-bottom: 4px;">${produto.nome}</h4>
+                                <p style="color: var(--text-muted); font-size: 14px;">${produto.descricao}</p>
+                                <p style="font-weight: 700; color: var(--primary-color); margin-top: 8px;">${formatCurrency(produto.preco)}</p>
+                            </div>
+                            <div class="produto-actions">
+                                <button class="btn-small btn-warning" onclick="editProduto(${produto.cdProduto}, '${produto.nome}', '${produto.descricao}', ${produto.preco})">
+                                    <i class="fa-solid fa-edit"></i>
+                                </button>
+                                <button class="btn-small" style="background: var(--primary-color); color: white;" onclick="deleteProduto(${produto.cdProduto})">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                container.innerHTML = '<p>Erro ao carregar produtos.</p>';
+            }
+        }
+
+        function openProdutoModal() {
+            document.getElementById('modal-title').textContent = 'Novo Produto';
+            document.getElementById('produto-id').value = '';
+            document.getElementById('produto-nome').value = '';
+            document.getElementById('produto-descricao').value = '';
+            document.getElementById('produto-preco').value = '';
+            document.getElementById('produto-modal').classList.add('active');
+        }
+
+        function closeProdutoModal() {
+            document.getElementById('produto-modal').classList.remove('active');
+        }
+
+        function editProduto(cdProduto, nome, descricao, preco) {
+            document.getElementById('modal-title').textContent = 'Editar Produto';
+            document.getElementById('produto-id').value = cdProduto;
+            document.getElementById('produto-nome').value = nome;
+            document.getElementById('produto-descricao').value = descricao;
+            document.getElementById('produto-preco').value = preco;
+            document.getElementById('produto-modal').classList.add('active');
+        }
+
+        async function deleteProduto(cdProduto) {
+            if (!confirm('Tem certeza que deseja deletar este produto?')) return;
+
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`/api/produtos/${cdProduto}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    loadProdutos();
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        document.getElementById('produto-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const produtoId = document.getElementById('produto-id').value;
+            const produto = {
+                nome: document.getElementById('produto-nome').value,
+                descricao: document.getElementById('produto-descricao').value,
+                preco: parseFloat(document.getElementById('produto-preco').value),
+                cdRestaurante: restauranteCd,
+                nota: 0.0
+            };
+
+            try {
+                let response;
+                if (produtoId) {
+                    response = await fetch(`/api/produtos/${produtoId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(produto)
+                    });
+                } else {
+                    response = await fetch('/api/produtos', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(produto)
+                    });
+                }
+
+                if (response.ok) {
+                    closeProdutoModal();
+                    loadProdutos();
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const decoded = parseJwt(token);
+            if (!decoded) {
+                logout();
+                return;
+            }
+
+            loadRestaurante();
+        });
+    </script>
+</body>
+</html>

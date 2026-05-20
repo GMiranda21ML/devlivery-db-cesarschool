@@ -60,7 +60,47 @@ INSERT INTO USUARIO (CPF, NOME, EMAIL, SENHA) VALUES
     ('10000000057', 'William Bonner', 'william.bonner@email.com', 'senha123'),
     ('10000000058', 'Renata Vasconcellos', 'renata.v@email.com', 'senha123'),
     ('10000000059', 'Sandra Annenberg', 'sandra.a@email.com', 'senha123'),
-    ('10000000060', 'Evaristo Costa', 'evaristo.costa@email.com', 'senha123');
+    ('10000000060', 'Evaristo Costa', 'evaristo.costa@email.com', 'senha123'),
+
+-- Donos de Restaurantes (Parceiros)
+    ('10000000061', 'Dono Pizzaria do Bairro', 'dono1@email.com', 'senha123'),
+    ('10000000062', 'Dono Burger House', 'dono2@email.com', 'senha123'),
+    ('10000000063', 'Dono Sushi Express', 'dono3@email.com', 'senha123'),
+    ('10000000064', 'Dono Churrascaria Boi M', 'dono4@email.com', 'senha123'),
+    ('10000000065', 'Dono Açaí Top', 'dono5@email.com', 'senha123'),
+    ('10000000066', 'Dono Cantina Italiana', 'dono6@email.com', 'senha123'),
+    ('10000000067', 'Dono Marmitaria Dona Ana', 'dono7@email.com', 'senha123'),
+    ('10000000068', 'Dono Taco Loco', 'dono8@email.com', 'senha123'),
+    ('10000000069', 'Dono Salada & Cia', 'dono9@email.com', 'senha123'),
+    ('10000000070', 'Dono Rei do Pastel', 'dono10@email.com', 'senha123'),
+    ('10000000071', 'Dono Doceria Açúcar', 'dono11@email.com', 'senha123'),
+    ('10000000072', 'Dono Shawarma do Habibi', 'dono12@email.com', 'senha123'),
+    ('10000000073', 'Dono Frango Crocante', 'dono13@email.com', 'senha123'),
+    ('10000000074', 'Dono Peixaria Mar Azul', 'dono14@email.com', 'senha123'),
+    ('10000000075', 'Dono Café Central', 'dono15@email.com', 'senha123'),
+    ('10000000076', 'Dono Pão Quente', 'dono16@email.com', 'senha123'),
+    ('10000000077', 'Dono Sorveteria Gelato', 'dono17@email.com', 'senha123'),
+    ('10000000078', 'Dono Espetinho do Zé', 'dono18@email.com', 'senha123'),
+    ('10000000079', 'Dono Caldo de Kenga', 'dono19@email.com', 'senha123'),
+    ('10000000080', 'Dono Dogão Prensado', 'dono20@email.com', 'senha123'),
+    ('10000000081', 'Dono Tapiocaria', 'dono21@email.com', 'senha123'),
+    ('10000000082', 'Dono Yakisoba Master', 'dono22@email.com', 'senha123'),
+    ('10000000083', 'Dono Vegan Eats', 'dono23@email.com', 'senha123'),
+    ('10000000084', 'Dono Império da Esfiha', 'dono24@email.com', 'senha123'),
+    ('10000000085', 'Dono Adega de Vinhos', 'dono25@email.com', 'senha123'),
+    ('10000000086', 'Dono Comida de Buteco', 'dono26@email.com', 'senha123'),
+    ('10000000087', 'Dono Bolo Caseiro', 'dono27@email.com', 'senha123'),
+    ('10000000088', 'Dono Acarajé da Baiana', 'dono28@email.com', 'senha123'),
+    ('10000000089', 'Dono Suco Natural', 'dono29@email.com', 'senha123'),
+    ('10000000090', 'Dono Mercadinho Rápido', 'dono30@email.com', 'senha123');
+
+INSERT INTO PARCEIRO (CPF) VALUES
+    ('10000000061'), ('10000000062'), ('10000000063'), ('10000000064'), ('10000000065'),
+    ('10000000066'), ('10000000067'), ('10000000068'), ('10000000069'), ('10000000070'),
+    ('10000000071'), ('10000000072'), ('10000000073'), ('10000000074'), ('10000000075'),
+    ('10000000076'), ('10000000077'), ('10000000078'), ('10000000079'), ('10000000080'),
+    ('10000000081'), ('10000000082'), ('10000000083'), ('10000000084'), ('10000000085'),
+    ('10000000086'), ('10000000087'), ('10000000088'), ('10000000089'), ('10000000090');
 
 INSERT INTO CATEGORIA (CD_CATEGORIA, NOME) VALUES
 (1, 'Lanches'), (2, 'Pizzas'), (3, 'Japonesa'), (4, 'Brasileira'), (5, 'Doces & Bolos'),
@@ -70,37 +110,37 @@ INSERT INTO CATEGORIA (CD_CATEGORIA, NOME) VALUES
 (21, 'Hot Dog'), (22, 'Tapioca'), (23, 'Pastel'), (24, 'Chinesa'), (25, 'Marmitas'),
 (26, 'Vegana'), (27, 'Massas'), (28, 'Frango'), (29, 'Gourmet'), (30, 'Mercado');
 
-INSERT INTO RESTAURANTE (CD_RESTAURANTE, CNPJ, NOME, TELEFONE, NUMERO, CEP, BAIRRO, RUA, CIDADE) VALUES
-    (1, '12345678000101', 'Pizzaria do Bairro', '11999990001', '10', '01000000', 'Centro', 'Rua A', 'São Paulo'),
-    (2, '12345678000102', 'Burger House', '11999990002', '20', '02000000', 'Jardins', 'Rua B', 'São Paulo'),
-    (3, '12345678000103', 'Sushi Express', '11999990003', '30', '03000000', 'Mooca', 'Rua C', 'São Paulo'),
-    (4, '12345678000104', 'Churrascaria Boi M', '11999990004', '40', '04000000', 'Lapa', 'Rua D', 'São Paulo'),
-    (5, '12345678000105', 'Açaí Top', '11999990005', '50', '05000000', 'Pinheiros', 'Rua E', 'São Paulo'),
-    (6, '12345678000106', 'Cantina Italiana', '11999990006', '60', '06000000', 'Vila Madalena', 'Rua F', 'São Paulo'),
-    (7, '12345678000107', 'Marmitaria Dona Ana', '11999990007', '70', '07000000', 'Tatuapé', 'Rua G', 'São Paulo'),
-    (8, '12345678000108', 'Taco Loco', '11999990008', '80', '08000000', 'Itaim Bibi', 'Rua H', 'São Paulo'),
-    (9, '12345678000109', 'Salada & Cia', '11999990009', '90', '09000000', 'Paulista', 'Rua I', 'São Paulo'),
-    (10, '12345678000110', 'Rei do Pastel', '11999990010', '100', '10000000', 'Liberdade', 'Rua J', 'São Paulo'),
-    (11, '12345678000111', 'Doceria Açúcar', '11999990011', '110', '11000000', 'Centro', 'Rua K', 'Rio de Janeiro'),
-    (12, '12345678000112', 'Shawarma do Habibi', '11999990012', '120', '12000000', 'Copacabana', 'Rua L', 'Rio de Janeiro'),
-    (13, '12345678000113', 'Frango Crocante', '11999990013', '130', '13000000', 'Botafogo', 'Rua M', 'Rio de Janeiro'),
-    (14, '12345678000114', 'Peixaria Mar Azul', '11999990014', '140', '14000000', 'Ipanema', 'Rua N', 'Rio de Janeiro'),
-    (15, '12345678000115', 'Café Central', '11999990015', '150', '15000000', 'Leblon', 'Rua O', 'Rio de Janeiro'),
-    (16, '12345678000116', 'Pão Quente', '11999990016', '160', '16000000', 'Barra', 'Rua P', 'Rio de Janeiro'),
-    (17, '12345678000117', 'Sorveteria Gelato', '11999990017', '170', '17000000', 'Centro', 'Rua Q', 'Curitiba'),
-    (18, '12345678000118', 'Espetinho do Zé', '11999990018', '180', '18000000', 'Batel', 'Rua R', 'Curitiba'),
-    (19, '12345678000119', 'Caldo de Kenga', '11999990019', '190', '19000000', 'Água Verde', 'Rua S', 'Curitiba'),
-    (20, '12345678000120', 'Dogão Prensado', '11999990020', '200', '20000000', 'Centro Cívico', 'Rua T', 'Curitiba'),
-    (21, '12345678000121', 'Tapiocaria da Nordestina', '11999990021', '210', '21000000', 'Boa Viagem', 'Rua U', 'Recife'),
-    (22, '12345678000122', 'Yakisoba Master', '11999990022', '220', '22000000', 'Pina', 'Rua V', 'Recife'),
-    (23, '12345678000123', 'Vegan Eats', '11999990023', '230', '23000000', 'Graças', 'Rua W', 'Recife'),
-    (24, '12345678000124', 'Império da Esfiha', '11999990024', '240', '24000000', 'Savassi', 'Rua X', 'Belo Horizonte'),
-    (25, '12345678000125', 'Adega de Vinhos', '11999990025', '250', '25000000', 'Lourdes', 'Rua Y', 'Belo Horizonte'),
-    (26, '12345678000126', 'Comida de Buteco', '11999990026', '260', '26000000', 'Pampulha', 'Rua Z', 'Belo Horizonte'),
-    (27, '12345678000127', 'Bolo Caseiro', '11999990027', '270', '27000000', 'Centro', 'Rua AA', 'Salvador'),
-    (28, '12345678000128', 'Acarajé da Baiana', '11999990028', '280', '28000000', 'Pelourinho', 'Rua AB', 'Salvador'),
-    (29, '12345678000129', 'Suco Natural', '11999990029', '290', '29000000', 'Rio Vermelho', 'Rua AC', 'Salvador'),
-    (30, '12345678000130', 'Mercadinho Rápido', '11999990030', '300', '30000000', 'Barra', 'Rua AD', 'Salvador');
+INSERT INTO RESTAURANTE (CD_RESTAURANTE, CNPJ, CPF_PARCEIRO, NOME, TELEFONE_RESTAURANTE, NUMERO, CEP, BAIRRO, RUA, CIDADE, NOTA, TAXA_ENTREGA, TEMPO_ENTREGA) VALUES
+    (1, '12345678000101', '10000000061', 'Pizzaria do Bairro', '11999990001', '10', '01000000', 'Centro', 'Rua A', 'São Paulo', 4.8, 0.00, 30),
+    (2, '12345678000102', '10000000062', 'Burger House', '11999990002', '20', '02000000', 'Jardins', 'Rua B', 'São Paulo', 4.5, 4.50, 45),
+    (3, '12345678000103', '10000000063', 'Sushi Express', '11999990003', '30', '03000000', 'Mooca', 'Rua C', 'São Paulo', 4.9, 12.00, 60),
+    (4, '12345678000104', '10000000064', 'Churrascaria Boi M', '11999990004', '40', '04000000', 'Lapa', 'Rua D', 'São Paulo', 4.2, 8.50, 50),
+    (5, '12345678000105', '10000000065', 'Açaí Top', '11999990005', '50', '05000000', 'Pinheiros', 'Rua E', 'São Paulo', 5.0, 0.00, 15),
+    (6, '12345678000106', '10000000066', 'Cantina Italiana', '11999990006', '60', '06000000', 'Vila Madalena', 'Rua F', 'São Paulo', 4.6, 6.00, 40),
+    (7, '12345678000107', '10000000067', 'Marmitaria Dona Ana', '11999990007', '70', '07000000', 'Tatuapé', 'Rua G', 'São Paulo', 3.8, 2.00, 20),
+    (8, '12345678000108', '10000000068', 'Taco Loco', '11999990008', '80', '08000000', 'Itaim Bibi', 'Rua H', 'São Paulo', 4.7, 5.50, 35),
+    (9, '12345678000109', '10000000069', 'Salada & Cia', '11999990009', '90', '09000000', 'Paulista', 'Rua I', 'São Paulo', 4.4, 0.00, 25),
+    (10, '12345678000110', '10000000070', 'Rei do Pastel', '11999990010', '100', '10000000', 'Liberdade', 'Rua J', 'São Paulo', 4.1, 3.00, 20),
+    (11, '12345678000111', '10000000071', 'Doceria Açúcar', '11999990011', '110', '11000000', 'Centro', 'Rua K', 'Rio de Janeiro', 4.8, 7.00, 40),
+    (12, '12345678000112', '10000000072', 'Shawarma do Habibi', '11999990012', '120', '12000000', 'Copacabana', 'Rua L', 'Rio de Janeiro', 4.5, 5.00, 30),
+    (13, '12345678000113', '10000000073', 'Frango Crocante', '11999990013', '130', '13000000', 'Botafogo', 'Rua M', 'Rio de Janeiro', 4.9, 0.00, 45),
+    (14, '12345678000114', '10000000074', 'Peixaria Mar Azul', '11999990014', '140', '14000000', 'Ipanema', 'Rua N', 'Rio de Janeiro', 4.3, 15.00, 60),
+    (15, '12345678000115', '10000000075', 'Café Central', '11999990015', '150', '15000000', 'Leblon', 'Rua O', 'Rio de Janeiro', 4.6, 4.50, 20),
+    (16, '12345678000116', '10000000076', 'Pão Quente', '11999990016', '160', '16000000', 'Barra', 'Rua P', 'Rio de Janeiro', 4.2, 2.50, 15),
+    (17, '12345678000117', '10000000077', 'Sorveteria Gelato', '11999990017', '170', '17000000', 'Centro', 'Rua Q', 'Curitiba', 5.0, 8.00, 30),
+    (18, '12345678000118', '10000000078', 'Espetinho do Zé', '11999990018', '180', '18000000', 'Batel', 'Rua R', 'Curitiba', 4.0, 0.00, 25),
+    (19, '12345678000119', '10000000079', 'Caldo de Kenga', '11999990019', '190', '19000000', 'Água Verde', 'Rua S', 'Curitiba', 4.4, 3.50, 35),
+    (20, '12345678000120', '10000000080', 'Dogão Prensado', '11999990020', '200', '20000000', 'Centro Cívico', 'Rua T', 'Curitiba', 3.9, 5.00, 20),
+    (21, '12345678000121', '10000000081', 'Tapiocaria da Nordestina', '11999990021', '210', '21000000', 'Boa Viagem', 'Rua U', 'Recife', 4.7, 0.00, 30),
+    (22, '12345678000122', '10000000082', 'Yakisoba Master', '11999990022', '220', '22000000', 'Pina', 'Rua V', 'Recife', 4.8, 6.50, 45),
+    (23, '12345678000123', '10000000083', 'Vegan Eats', '11999990023', '230', '23000000', 'Graças', 'Rua W', 'Recife', 5.0, 0.00, 40),
+    (24, '12345678000124', '10000000084', 'Império da Esfiha', '11999990024', '240', '24000000', 'Savassi', 'Rua X', 'Belo Horizonte', 4.1, 4.00, 25),
+    (25, '12345678000125', '10000000085', 'Adega de Vinhos', '11999990025', '250', '25000000', 'Lourdes', 'Rua Y', 'Belo Horizonte', 4.9, 20.00, 60),
+    (26, '12345678000126', '10000000086', 'Comida de Buteco', '11999990026', '260', '26000000', 'Pampulha', 'Rua Z', 'Belo Horizonte', 4.5, 0.00, 20),
+    (27, '12345678000127', '10000000087', 'Bolo Caseiro', '11999990027', '270', '27000000', 'Centro', 'Rua AA', 'Salvador', 4.6, 5.00, 30),
+    (28, '12345678000128', '10000000088', 'Acarajé da Baiana', '11999990028', '280', '28000000', 'Pelourinho', 'Rua AB', 'Salvador', 4.8, 8.50, 35),
+    (29, '12345678000129', '10000000089', 'Suco Natural', '11999990029', '290', '29000000', 'Rio Vermelho', 'Rua AC', 'Salvador', 4.3, 0.00, 15),
+    (30, '12345678000130', '10000000090', 'Mercadinho Rápido', '11999990030', '300', '30000000', 'Barra', 'Rua AD', 'Salvador', 3.7, 2.00, 20);
 
 INSERT INTO CUPOM (CD_CUPOM, TIPO, VALIDADE) VALUES
     (1, 'DESCONTO10', '2026-12-31'), (2, 'FRETEGRATIS', '2026-12-31'), (3, 'BEMVINDO20', '2026-12-31'),
@@ -210,7 +250,7 @@ INSERT INTO PRODUTO (CD_PRODUTO, NOME, DESCRICAO, NOTA, PRECO, CD_RESTAURANTE) V
     (27, 'Torta de Limão', 'Fatia generosa', 4.9, 14.00, 27),
     (28, 'Acarajé Completo', 'Vatapá, caruru e camarão seco', 4.8, 20.00, 28),
     (29, 'Suco de Laranja', '1L espremido na hora', 4.9, 15.00, 29),
-(30, 'Refrigerante 2L', 'Coca-Cola', 4.8, 12.00, 30);
+    (30, 'Refrigerante 2L', 'Coca-Cola', 4.8, 12.00, 30);
 
 INSERT INTO PEDIDO (CD_PEDIDO, VALOR_TOTAL, STATUS, DATA, CD_RESTAURANTE, CPF_CLIENTE, CPF_ENTREGADOR, CD_CUPOM) VALUES
     (1, 45.90, 'Entregue', '2025-10-01', 1, '10000000001', '10000000031', 1),
@@ -242,12 +282,15 @@ INSERT INTO PEDIDO (CD_PEDIDO, VALOR_TOTAL, STATUS, DATA, CD_RESTAURANTE, CPF_CL
     (27, 14.00, 'Cancelado', '2025-10-27', 27, '10000000027', '10000000057', 27),
     (28, 20.00, 'Entregue', '2025-10-28', 28, '10000000028', '10000000058', NULL),
     (29, 15.00, 'Entregue', '2025-10-29', 29, '10000000029', '10000000059', 29),
-(30, 12.00, 'Entregue', '2025-10-30', 30, '10000000030', '10000000060', NULL);
+    (30, 12.00, 'Entregue', '2025-10-30', 30, '10000000030', '10000000060', NULL);
 
-INSERT INTO CONTEM (CD_PEDIDO, CD_PRODUTO) VALUES
-    (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10),
-    (11, 11), (12, 12), (13, 13), (14, 14), (15, 15), (16, 16), (17, 17), (18, 18), (19, 19), (20, 20),
-    (21, 21), (22, 22), (23, 23), (24, 24), (25, 25), (26, 26), (27, 27), (28, 28), (29, 29), (30, 30);
+INSERT INTO CONTEM (CD_PEDIDO, CD_PRODUTO, QUANTIDADE) VALUES
+    (1, 1, 1), (2, 2, 1), (3, 3, 1), (4, 4, 1), (5, 5, 1),
+    (6, 6, 1), (7, 7, 1), (8, 8, 1), (9, 9, 1), (10, 10, 1),
+    (11, 11, 1), (12, 12, 1), (13, 13, 1), (14, 14, 1), (15, 15, 1),
+    (16, 16, 1), (17, 17, 1), (18, 18, 1), (19, 19, 1), (20, 20, 1),
+    (21, 21, 1), (22, 22, 1), (23, 23, 1), (24, 24, 1), (25, 25, 1),
+    (26, 26, 1), (27, 27, 1), (28, 28, 1), (29, 29, 1), (30, 30, 1);
 
 INSERT INTO PAGAMENTO (CD_PAGAMENTO, TIPO, SUBTIPO_CARTAO, DATA_HORA, VALOR, CD_PEDIDO) VALUES
     (1, 'Cartão', 'Crédito Mastercard', '2025-10-01 20:30:00', 45.90, 1),

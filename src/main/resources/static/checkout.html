@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Dev-livery</title>
+    <link rel="stylesheet" href="css/auth.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card auth-card-large">
+            <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Voltar para Home</a>
+            
+            <div class="logo">
+                <i class="fa-solid fa-motorcycle"></i>
+                <h1>Dev-livery</h1>
+            </div>
+
+            <h2>Finalizar Pedido</h2>
+
+            <form class="auth-form" id="checkout-form">
+                <div class="form-section">
+                    <h3>Resumo do Pedido</h3>
+                    <div id="cart-items" style="margin-bottom: 20px;">
+                        <p>Carregando...</p>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 600; margin-top: 20px;">
+                        <span>Total:</span>
+                        <span id="total-price">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary btn-block" style="margin-top: 30px;">Finalizar Pedido</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const token = localStorage.getItem('token');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            renderCart();
+
+            const form = document.getElementById('checkout-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await finalizarPedido();
+            });
+        });
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            const totalElement = document.getElementById('total-price');
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p>Seu carrinho está vazio!</p>';
+                totalElement.textContent = 'R$ 0,00';
+                return;
+            }
+
+            let total = 0;
+            let html = '';
+            cart.forEach(item => {
+                const subtotal = item.preco * item.quantidade;
+                total += subtotal;
+                html += `
+                    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
+                        <div>
+                            <h4 style="margin: 0;">${item.nome}</h4>
+                            <p style="margin: 0; color: #666;">Qtd: ${item.quantidade}</p>
+                        </div>
+                        <span>R$ ${subtotal.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            totalElement.textContent = `R$ ${total.toFixed(2)}`;
+        }
+
+        async function finalizarPedido() {
+            try {
+                const decoded = parseJwt(token);
+                const cdRestaurante = cart[0].cdRestaurante;
+
+                const data = {
+                    cpfCliente: decoded.sub,
+                    cdRestaurante: cdRestaurante,
+                    items: cart.map(item => ({
+                        cdProduto: item.cdProduto,
+                        quantidade: item.quantidade
+                    }))
+                };
+
+                const response = await fetch('/api/pedidos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Pedido finalizado com sucesso!');
+                    localStorage.removeItem('cart');
+                    window.location.href = 'index.html';
+                } else {
+                    const error = await response.text();
+                    alert('Erro: ' + error);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao conectar com o servidor');
+            }
+        }
+
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+    </script>
+</body>
+</html>

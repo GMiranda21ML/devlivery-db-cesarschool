@@ -8,14 +8,22 @@ function setRole(role) {
     // 2. Atualiza os botões visuais
     const btnCliente = document.getElementById('btn-cliente');
     const btnEntregador = document.getElementById('btn-entregador');
+    const btnParceiro = document.getElementById('btn-parceiro');
+    const btnRestaurante = document.getElementById('btn-restaurante');
 
-    if (btnCliente && btnEntregador) {
-        if (role === 'cliente') {
+    const allButtons = [btnCliente, btnEntregador, btnParceiro, btnRestaurante].filter(btn => btn !== null);
+
+    if (allButtons.length > 0) {
+        allButtons.forEach(btn => btn.classList.remove('active'));
+
+        if (role === 'cliente' && btnCliente) {
             btnCliente.classList.add('active');
-            btnEntregador.classList.remove('active');
-        } else {
+        } else if (role === 'entregador' && btnEntregador) {
             btnEntregador.classList.add('active');
-            btnCliente.classList.remove('active');
+        } else if (role === 'parceiro' && btnParceiro) {
+            btnParceiro.classList.add('active');
+        } else if (role === 'restaurante' && btnRestaurante) {
+            btnRestaurante.classList.add('active');
         }
     }
 }
@@ -24,14 +32,19 @@ function switchForm(role) {
     setRole(role);
     const clienteFields = document.getElementById('cliente-fields');
     const entregadorFields = document.getElementById('entregador-fields');
+    const parceiroFields = document.getElementById('parceiro-fields');
 
-    if (clienteFields && entregadorFields) {
-        if (role === 'cliente') {
+    const allFields = [clienteFields, entregadorFields, parceiroFields].filter(el => el !== null);
+
+    if (allFields.length > 0) {
+        allFields.forEach(el => el.classList.add('hidden'));
+
+        if (role === 'cliente' && clienteFields) {
             clienteFields.classList.remove('hidden');
-            entregadorFields.classList.add('hidden');
-        } else {
+        } else if (role === 'entregador' && entregadorFields) {
             entregadorFields.classList.remove('hidden');
-            clienteFields.classList.add('hidden');
+        } else if (role === 'parceiro' && parceiroFields) {
+            parceiroFields.classList.remove('hidden');
         }
     }
 }
@@ -94,7 +107,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok) {
                     const data = await response.json();
                     localStorage.setItem('token', data.token);
-                    window.location.href = 'index.html';
+                    localStorage.setItem('role', role);
+
+                    if (role === 'restaurante') {
+                        window.location.href = 'painel-restaurante.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
                 } else {
                     alert('Falha no login. Verifique suas credenciais.');
                 }
@@ -107,11 +126,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- LÓGICA DE CADASTRO ---
     const cadastroForm = document.getElementById('cadastro-form');
+    console.log('cadastroForm:', cadastroForm);
     if (cadastroForm) {
         cadastroForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('Form submitted!');
 
-            const isCliente = !document.getElementById('cliente-fields').classList.contains('hidden');
+            const role = document.getElementById('role').value;
+            console.log('Selected role:', role);
 
             const data = {
                 nome: document.getElementById('nome').value,
@@ -123,19 +145,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let endpoint = '';
 
-            if (isCliente) {
+            if (role === 'cliente') {
                 endpoint = '/api/clientes/cadastro';
                 data.cep = document.getElementById('cep').value;
                 data.rua = document.getElementById('rua').value;
                 data.numero = document.getElementById('numero').value;
                 data.bairro = document.getElementById('bairro').value;
                 data.cidade = document.getElementById('cidade').value;
-                data.convidado = document.getElementById('convidado').value;
-            } else {
+
+                const campoConvidado = document.getElementById('convidado');
+                data.convidado = campoConvidado ? campoConvidado.value : null;
+
+            } else if (role === 'entregador') {
                 endpoint = '/api/entregadores/cadastro';
                 data.veiculo = document.getElementById('veiculo').value;
                 data.placa = document.getElementById('placa').value;
+            } else if (role === 'parceiro') {
+                endpoint = '/api/parceiros/cadastro';
             }
+
+            console.log('endpoint:', endpoint);
+            console.log('data:', data);
 
             try {
                 const response = await fetch(endpoint, {

@@ -43,6 +43,10 @@ public class AuthController {
                 sql = "SELECT 1 FROM CLIENTE WHERE CPF = ?";
             } else if ("entregador".equalsIgnoreCase(dto.role())) {
                 sql = "SELECT 1 FROM ENTREGADOR WHERE CPF = ?";
+            } else if ("parceiro".equalsIgnoreCase(dto.role())) {
+                sql = "SELECT 1 FROM PARCEIRO WHERE CPF = ?";
+            } else if ("restaurante".equalsIgnoreCase(dto.role())) {
+                sql = "SELECT 1 FROM RESTAURANTE WHERE CPF_PARCEIRO = ?";
             } else {
                 return ResponseEntity.badRequest().body("Perfil inválido.");
             }

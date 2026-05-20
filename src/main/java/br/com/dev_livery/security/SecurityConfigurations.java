@@ -29,6 +29,8 @@ public class SecurityConfigurations {
                 .csrf(csrf -> csrf.disable()) // Desabilita proteção CSRF (padrão em APIs REST)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // API sem estado (usa JWT)
                 .authorizeHttpRequests(authorize -> authorize
+
+                        // 1. RECURSOS PÚBLICOS BÁSICOS (Telas HTML, CSS, JS, Imagens, Swagger)
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
@@ -40,11 +42,36 @@ public class SecurityConfigurations {
                                 "/images/**",
                                 "/favicon.ico"
                         ).permitAll()
+
+                        // 2. CADASTROS E LOGIN (Tudo Público)
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/clientes/cadastro").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/entregadores/cadastro").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/parceiros/cadastro").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/restaurantes/cadastro").permitAll()
+
+                        // 3. O SEGREDO ESTÁ AQUI: VISUALIZAÇÃO PÚBLICA (Qualquer usuário pode ver lista e menu)
+                        .requestMatchers(HttpMethod.GET, "/api/restaurantes").permitAll() // Vê a lista da página inicial
+                        .requestMatchers(HttpMethod.GET, "/api/restaurantes/**").permitAll() // Vê os detalhes de 1 restaurante
+                        .requestMatchers(HttpMethod.GET, "/api/produtos/restaurante/**").permitAll() // Vê o cardápio
+                        .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
+                        .requestMatchers("/api/home/**").permitAll()
+
+                        .requestMatchers("/api/restaurantes/**").hasAnyRole("RESTAURANTE", "PARCEIRO")
+                        .requestMatchers("/api/produtos/**").hasAnyRole("RESTAURANTE", "PARCEIRO")
+                        .requestMatchers("/api/pedidos/restaurante/**").hasAnyRole("RESTAURANTE", "PARCEIRO")
+
+                        // 4. AÇÕES RESTRITAS DE CLIENTE (Precisa estar logado)
                         .requestMatchers("/api/clientes/**").hasRole("CLIENTE")
+                        .requestMatchers("/api/pedidos/**").hasRole("CLIENTE") // Só o cliente logado faz pedido
+
+                        // 5. AÇÕES RESTRITAS DE ENTREGADOR
                         .requestMatchers("/api/entregadores/**").hasRole("ENTREGADOR")
+
+                        // 6. AÇÕES RESTRITAS DE PARCEIROS E DONOS DE RESTAURANTES
+                        .requestMatchers("/api/parceiros/**").hasRole("PARCEIRO")
+
+                        // 7. QUALQUER OUTRA ROTA EXIGE ESTAR LOGADO
                         .anyRequest().authenticated()
                 )
                 // Coloca o nosso filtro de JWT antes do filtro padrão do Spring

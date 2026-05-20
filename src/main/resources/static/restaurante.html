@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurante - Dev-livery</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="container navbar-content">
+            <div class="logo">
+                <i class="fa-solid fa-motorcycle"></i>
+                <h1>Dev-livery</h1>
+            </div>
+            <nav class="nav-links" id="nav-actions">
+                <a href="login.html" class="btn-primary" id="login-btn">Entrar</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <a href="index.html" style="text-decoration: none; color: var(--primary-color); margin-bottom: 20px; display: inline-block;">
+            <i class="fa-solid fa-arrow-left"></i> Voltar para Home
+        </a>
+        
+        <section class="categories-section" id="restaurante-info">
+            <h2 id="restaurante-nome">Carregando...</h2>
+        </section>
+
+        <section class="restaurants-section">
+            <h3>Produtos</h3>
+            <div class="restaurants-grid" id="produtos-container">
+                <p>Carregando produtos...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <h2>Dev-livery</h2>
+                <p>O melhor app para devs famintos.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let currentRestauranteCd = null;
+        let currentRestauranteNome = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            currentRestauranteCd = parseInt(params.get('cdRestaurante'));
+
+            if (!currentRestauranteCd) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Check login status
+            const token = localStorage.getItem('token');
+            if (token) {
+                const decoded = parseJwt(token);
+                const role = decoded.role;
+                const navActions = document.getElementById('nav-actions');
+                if (navActions) {
+                    let navContent = '';
+                    
+                    if (role === 'parceiro') {
+                        navContent += `
+                            <a href="criar-restaurante.html" class="btn-icon" style="text-decoration: none; color: #1da55a;">
+                                <i class="fa-solid fa-store"></i>
+                                <span>Criar Restaurante</span>
+                            </a>
+                        `;
+                    }
+                    
+                    navContent += `
+                        <a href="perfil.html" class="btn-icon" style="text-decoration: none;">
+                            <i class="fa-solid fa-user"></i>
+                            <span>Perfil</span>
+                        </a>
+                        <button class="btn-icon" onclick="logout()" style="color: var(--primary-color);">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                            <span>Sair</span>
+                        </button>
+                    `;
+                    
+                    if (role === 'cliente') {
+                        navContent += `
+                            <button class="btn-icon cart-btn" onclick="openCart()" aria-label="Carrinho">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                                <span class="cart-badge">${getCartCount()}</span>
+                            </button>
+                        `;
+                    }
+                    
+                    navActions.innerHTML = navContent;
+                }
+            }
+
+            // Load restaurante info
+            try {
+                const restauranteRes = await fetch(`/api/home/restaurantes/${currentRestauranteCd}`);
+                if (restauranteRes.ok) {
+                    const restaurante = await restauranteRes.json();
+                    currentRestauranteNome = restaurante.nome;
+                    document.getElementById('restaurante-nome').textContent = restaurante.nome;
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+
+            // Load products
+            try {
+                const produtosRes = await fetch(`/api/produtos/restaurante/${currentRestauranteCd}`); // Rota corrigida!
+                if (produtosRes.ok) {
+                    const produtos = await produtosRes.json();
+                    renderProdutos(produtos);
+                } else {
+                    document.getElementById('produtos-container').innerHTML = '<p>Nenhum produto encontrado.</p>';
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                document.getElementById('produtos-container').innerHTML = '<p>Erro ao carregar o cardápio.</p>';
+            }
+        });
+
+        function renderProdutos(produtos) {
+            const container = document.getElementById('produtos-container');
+            container.innerHTML = '';
+
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.gap = '15px';
+
+            produtos.forEach(produto => {
+                // Vai buscar a foto do produto exato à pasta local
+                const fotoMascara = `/images/prod/prod_${produto.cdProduto}.jpg`;
+
+                const card = document.createElement('div');
+                card.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee;';
+
+                // ... (o resto do card.innerHTML mantém-se igual) ...
+                card.innerHTML = `
+                    <div style="display: flex; gap: 15px; flex: 1;">
+                        <img src="${fotoMascara}" alt="${produto.nome}" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="display: flex; flex-direction: column; justify-content: center;">
+                            <h4 style="margin: 0; font-size: 1.1rem; color: #3e3e3e;">${produto.nome}</h4>
+                            <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #717171; max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${produto.descricao}</p>
+                            <span style="margin-top: 8px; font-weight: 600; color: #ea1d2c;">R$ ${produto.preco.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                        <button class="btn-primary" style="padding: 8px 16px; font-size: 0.9rem;" onclick='addToCart(${JSON.stringify(produto)})'>Adicionar</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addToCart(produto) {
+            if (cart.length > 0 && cart[0].cdRestaurante !== produto.cdRestaurante) {
+                if (!confirm('Carrinho tem itens de outro restaurante. Deseja limpar?')) {
+                    return;
+                }
+                cart = [];
+            }
+
+            const existing = cart.find(item => item.cdProduto === produto.cdProduto);
+            if (existing) {
+                existing.quantidade++;
+            } else {
+                cart.push({
+                    ...produto,
+                    quantidade: 1
+                });
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartBadge();
+            alert('Produto adicionado ao carrinho!');
+        }
+
+        function getCartCount() {
+            return cart.reduce((sum, item) => sum + item.quantidade, 0);
+        }
+
+        function updateCartBadge() {
+            const badge = document.querySelector('.cart-badge');
+            if (badge) {
+                badge.textContent = getCartCount();
+            }
+        }
+
+        function openCart() {
+            window.location.href = 'checkout.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('cart');
+            window.location.reload();
+        }
+
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+    </script>
+</body>
+</html>

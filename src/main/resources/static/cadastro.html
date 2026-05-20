@@ -24,9 +24,11 @@
             <div class="auth-tabs">
                 <button id="btn-cliente" class="tab-btn active" onclick="switchForm('cliente')">Sou Cliente</button>
                 <button id="btn-entregador" class="tab-btn" onclick="switchForm('entregador')">Sou Entregador</button>
+                <button id="btn-parceiro" class="tab-btn" onclick="switchForm('parceiro')">Sou Parceiro</button>
             </div>
 
-            <form action="login.html" class="auth-form" id="cadastro-form">
+            <form class="auth-form" id="cadastro-form">
+                <input type="hidden" id="role" name="role" value="cliente">
                 <!-- DADOS GERAIS (Tabela USUARIO e TELEFONE) -->
                 <div class="form-section">
                     <h3>Dados Pessoais</h3>
@@ -86,11 +88,6 @@
                             <label for="cidade">Cidade</label>
                             <input type="text" id="cidade" placeholder="Sua cidade">
                         </div>
-
-                        <div class="form-group">
-                            <label for="convidado">CPF de quem convidou (Opcional)</label>
-                            <input type="text" id="convidado" placeholder="000.000.000-00">
-                        </div>
                     </div>
                 </div>
 
@@ -114,7 +111,6 @@
                         </div>
                     </div>
                 </div>
-
                 <button type="submit" class="btn-primary btn-block">Criar Conta</button>
             </form>
 
