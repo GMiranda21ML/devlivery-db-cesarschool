@@ -3,384 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Restaurante - Dev-livery</title>
+    <title>Painel do Parceiro | DevLivery</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/painel.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header class="navbar">
-        <div class="container navbar-content">
-            <div class="navbar-left">
-                <div class="logo">
-                    <i class="fa-solid fa-motorcycle"></i>
-                    <h1>Dev-livery</h1>
-                </div>
-                <a href="index.html" class="back-link" aria-label="Voltar para Home">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Voltar para Home</span>
-                </a>
-            </div>
-            <div class="nav-actions" id="nav-actions">
-                <button class="btn-icon" onclick="logout()">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    <span>Sair</span>
-                </button>
-            </div>
+
+<nav class="navbar">
+    <div class="nav-brand nav-brand-clickable" onclick="window.location.href='index.html'">
+        <i class="fa-solid fa-burger nav-brand-icon"></i>
+        <span class="nav-brand-text">Dev<span class="nav-brand-highlight">Livery</span> Parceiros</span>
+    </div>
+    <div class="nav-actions" id="nav-actions">
+    </div>
+</nav>
+
+<div class="dashboard-container">
+    <div class="header-painel">
+        <div class="header-info">
+            <h1 id="nome-restaurante">Carregando restaurante...</h1>
+            <p>Gerencie seus pedidos e faturamento.</p>
         </div>
-    </header>
-
-    <main class="container painel-main">
-        <section class="categories-section">
-            <h2>Painel do Restaurante</h2>
-        </section>
-
-        <section class="categories-section">
-            <h3>Estatísticas</h3>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h4>Faturamento Total</h4>
-                    <div class="value" id="faturamento-valor">R$ 0,00</div>
-                </div>
-                <div class="stat-card">
-                    <h4>Pedidos Pendentes</h4>
-                    <div class="value" id="pedidos-pendentes-qtd">0</div>
-                </div>
-            </div>
-        </section>
-
-        <section class="categories-section">
-            <div class="section-header">
-                <h3>Pedidos Pendentes</h3>
-            </div>
-            <div id="pedidos-pendentes-container">
-                <p>Carregando pedidos...</p>
-            </div>
-        </section>
-
-        <section class="categories-section">
-            <div class="section-header">
-                <h3>Produtos</h3>
-                <button class="btn-primary" onclick="openProdutoModal()">
-                    <i class="fa-solid fa-plus"></i> Novo Produto
-                </button>
-            </div>
-            <div id="produtos-container">
-                <p>Carregando produtos...</p>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container footer-content">
-            <div class="footer-brand">
-                <h2>Dev-livery</h2>
-                <p>O melhor app para devs famintos.</p>
-            </div>
-        </div>
-    </footer>
-
-    <div class="modal" id="produto-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">Novo Produto</h3>
-                <button class="btn-icon" onclick="closeProdutoModal()" style="border: none; background: none; cursor: pointer;">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-            </div>
-            <form id="produto-form">
-                <input type="hidden" id="produto-id">
-                <div class="form-group">
-                    <label for="produto-nome">Nome</label>
-                    <input type="text" id="produto-nome" required>
-                </div>
-                <div class="form-group">
-                    <label for="produto-descricao">Descrição</label>
-                    <textarea id="produto-descricao" rows="3" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="produto-preco">Preço</label>
-                    <input type="number" step="0.01" id="produto-preco" required>
-                </div>
-                <button type="submit" class="btn-primary btn-block">Salvar Produto</button>
-            </form>
+        <div class="header-acoes">
+            <button class="btn-procedure" onclick="recalcularNotas()">
+                <i class="fa-solid fa-star"></i> Recalcular Notas (Procedure MySQL)
+            </button>
         </div>
     </div>
 
-    <script>
-        let restauranteCd = null;
+    <div class="metric-cards">
+        <div class="metric-card metric-faturamento">
+            <h3 class="metric-title"><i class="fa-solid fa-money-bill-trend-up"></i> Faturamento Total</h3>
+            <h2 id="valor-faturamento" class="metric-value faturamento-valor">R$ 0,00</h2>
+            <p class="metric-subtitle">Pedidos concluídos</p>
+        </div>
+        <div class="metric-card metric-pedidos">
+            <h3 class="metric-title"><i class="fa-solid fa-bell"></i> Pedidos na Fila</h3>
+            <h2 id="qtd-pedidos" class="metric-value pedidos-valor">0</h2>
+            <p class="metric-subtitle">Aguardando preparo</p>
+        </div>
+    </div>
 
-        function parseJwt(token) {
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                return JSON.parse(jsonPayload);
-            } catch (e) {
-                return null;
-            }
+    <h2><i class="fa-solid fa-clock"></i> Pedidos Pendentes (Query 2)</h2>
+    <div id="lista-pedidos-pendentes" class="pedidos-grid">
+        <p>Carregando pedidos...</p>
+    </div>
+</div>
+
+<script src="js/script.js"></script>
+<script>
+    let cdRestauranteLogado = null;
+    const tokenPainel = localStorage.getItem('token');
+
+    async function inicializarPainel() {
+        if (!tokenPainel) {
+            window.location.href = 'login.html';
+            return;
         }
 
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('cart');
+        const decoded = parseJwt(tokenPainel);
+        if(decoded.role !== 'parceiro') {
+            alert('Acesso negado. Apenas parceiros podem acessar esta página.');
             window.location.href = 'index.html';
+            return;
         }
 
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        const cpfParceiro = decoded.sub;
+
+        try {
+            const resRestaurante = await fetch(`/api/restaurantes/${cpfParceiro}`, {
+                headers: { 'Authorization': `Bearer ${tokenPainel}` }
+            });
+
+            if (resRestaurante.ok) {
+                const restaurante = await resRestaurante.json();
+                cdRestauranteLogado = restaurante.cdRestaurante;
+                document.getElementById('nome-restaurante').textContent = `Painel: ${restaurante.nome}`;
+
+                carregarPedidosPendentes();
+                carregarFaturamento();
+            } else {
+                alert('Você ainda não cadastrou um restaurante!');
+                window.location.href = 'criar-restaurante.html';
+            }
+        } catch (error) {
+            console.error("Erro ao carregar o painel:", error);
         }
+    }
 
-        async function loadRestaurante() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
+    async function carregarPedidosPendentes() {
+        if(!cdRestauranteLogado) return;
 
-            const decoded = parseJwt(token);
-            if (!decoded) {
-                logout();
-                return;
-            }
+        try {
+            const response = await fetch(`/api/pedidos/restaurante/${cdRestauranteLogado}/pendentes`, {
+                headers: { 'Authorization': `Bearer ${tokenPainel}` }
+            });
 
-            try {
-                const response = await fetch(`/api/restaurantes/${decoded.sub}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+            const container = document.getElementById('lista-pedidos-pendentes');
 
-                if (response.ok) {
-                    const restaurante = await response.json();
-                    restauranteCd = restaurante.cdRestaurante;
-                    loadPedidos();
-                    loadFaturamento();
-                    loadProdutos();
+            if (response.ok) {
+                const pedidos = await response.json();
+                document.getElementById('qtd-pedidos').textContent = pedidos.length;
+
+                if (pedidos.length === 0) {
+                    container.innerHTML = '<p class="empty-state">Nenhum pedido pendente no momento.</p>';
+                    return;
                 }
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        }
 
-        async function loadPedidos() {
-            const token = localStorage.getItem('token');
-            const container = document.getElementById('pedidos-pendentes-container');
-            const qtdContainer = document.getElementById('pedidos-pendentes-qtd');
-
-            try {
-                const response = await fetch(`/api/pedidos/restaurante/${restauranteCd}/pendentes`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    const pedidos = await response.json();
-                    qtdContainer.textContent = pedidos.length;
-
-                    if (pedidos.length === 0) {
-                        container.innerHTML = '<p>Nenhum pedido pendente.</p>';
-                        return;
-                    }
-
-                    container.innerHTML = pedidos.map(pedido => `
+                container.innerHTML = '';
+                pedidos.forEach(pedido => {
+                    container.innerHTML += `
                         <div class="pedido-card">
                             <div class="pedido-header">
-                                <h4>Pedido #${pedido.cdPedido}</h4>
-                                <span style="font-weight: 700; color: var(--primary-color);">${formatCurrency(pedido.valorTotal)}</span>
+                                <strong>Pedido #${pedido.cdPedido}</strong>
+                                <span class="badge-pendente">Pendente</span>
                             </div>
-                            <p style="color: var(--text-muted); margin-bottom: 8px;">Cliente: ${pedido.cpfCliente}</p>
-                            <p style="color: var(--text-muted); margin-bottom: 12px;">Data: ${pedido.data}</p>
-                            <div class="pedido-actions">
-                                <button class="btn-small btn-success" onclick="atualizarStatusPedido(${pedido.cdPedido}, 'Aceito')">Aceitar</button>
-                                <button class="btn-small btn-warning" onclick="atualizarStatusPedido(${pedido.cdPedido}, 'Pronto para Entrega')">Pronto para Entrega</button>
-                            </div>
+                            <p class="pedido-info"><i class="fa-solid fa-user"></i> <strong>Cliente CPF:</strong> ${pedido.cpfCliente}</p>
+                            <p class="pedido-info"><i class="fa-solid fa-calendar"></i> <strong>Data:</strong> ${pedido.data}</p>
+                            <h3 class="pedido-valor-total">R$ ${pedido.valorTotal.toFixed(2).replace('.', ',')}</h3>
+
+                            <button class="btn-acao btn-preparo" onclick="aceitarPedido(${pedido.cdPedido})">
+                                <i class="fa-solid fa-fire-burner"></i> Aceitar e Preparar
+                            </button>
                         </div>
-                    `).join('');
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                container.innerHTML = '<p>Erro ao carregar pedidos.</p>';
-            }
-        }
-
-        async function atualizarStatusPedido(cdPedido, status) {
-            const token = localStorage.getItem('token');
-            try {
-                const response = await fetch(`/api/pedidos/${cdPedido}/status`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'text/plain',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: status
+                    `;
                 });
-
-                if (response.ok) {
-                    loadPedidos();
-                }
-            } catch (error) {
-                console.error('Erro:', error);
             }
+        } catch (error) {
+            console.error('Erro ao buscar pedidos:', error);
         }
+    }
 
-        async function loadFaturamento() {
-            const token = localStorage.getItem('token');
-            const container = document.getElementById('faturamento-valor');
-
-            try {
-                const response = await fetch(`/api/pedidos/restaurante/${restauranteCd}/faturamento`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    const faturamento = await response.json();
-                    container.textContent = formatCurrency(faturamento);
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                container.textContent = 'Erro';
+    async function carregarFaturamento() {
+        try {
+            const response = await fetch(`/api/pedidos/restaurante/${cdRestauranteLogado}/faturamento`, {
+                headers: { 'Authorization': `Bearer ${tokenPainel}` }
+            });
+            if(response.ok) {
+                const faturamento = await response.json();
+                document.getElementById('valor-faturamento').textContent = `R$ ${faturamento.toFixed(2).replace('.', ',')}`;
             }
+        } catch (error) {
+            console.error("Erro faturamento:", error);
         }
+    }
 
-        async function loadProdutos() {
-            const token = localStorage.getItem('token');
-            const container = document.getElementById('produtos-container');
+    async function aceitarPedido(cdPedido) {
+        if(!confirm('Deseja mover este pedido para "Em preparo"? O histórico será gravado no banco.')) return;
 
-            try {
-                const response = await fetch(`/api/produtos/restaurante/${restauranteCd}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+        try {
+            const response = await fetch(`/api/pedidos/${cdPedido}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tokenPainel}`
+                },
+                body: JSON.stringify({ status: 'Em preparo' })
+            });
 
-                if (response.ok) {
-                    const produtos = await response.json();
-                    if (produtos.length === 0) {
-                        container.innerHTML = '<p>Nenhum produto cadastrado.</p>';
-                        return;
-                    }
-
-                    container.innerHTML = produtos.map(produto => `
-                        <div class="produto-item">
-                            <div>
-                                <h4 style="margin-bottom: 4px;">${produto.nome}</h4>
-                                <p style="color: var(--text-muted); font-size: 14px;">${produto.descricao}</p>
-                                <p style="font-weight: 700; color: var(--primary-color); margin-top: 8px;">${formatCurrency(produto.preco)}</p>
-                            </div>
-                            <div class="produto-actions">
-                                <button class="btn-small btn-warning" onclick="editProduto(${produto.cdProduto}, '${produto.nome}', '${produto.descricao}', ${produto.preco})">
-                                    <i class="fa-solid fa-edit"></i>
-                                </button>
-                                <button class="btn-small" style="background: var(--primary-color); color: white;" onclick="deleteProduto(${produto.cdProduto})">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                container.innerHTML = '<p>Erro ao carregar produtos.</p>';
+            if (response.ok) {
+                alert('Pedido aceito! Procedure executada com sucesso.');
+                carregarPedidosPendentes();
+            } else {
+                alert('Erro ao atualizar o status do pedido no banco de dados.');
             }
+        } catch (error) {
+            console.error('Erro:', error);
         }
+    }
 
-        function openProdutoModal() {
-            document.getElementById('modal-title').textContent = 'Novo Produto';
-            document.getElementById('produto-id').value = '';
-            document.getElementById('produto-nome').value = '';
-            document.getElementById('produto-descricao').value = '';
-            document.getElementById('produto-preco').value = '';
-            document.getElementById('produto-modal').classList.add('active');
-        }
+    async function recalcularNotas() {
+        if(!confirm('Deseja recalcular a nota de todos os produtos do seu restaurante usando a Procedure do Banco?')) return;
 
-        function closeProdutoModal() {
-            document.getElementById('produto-modal').classList.remove('active');
-        }
+        try {
+            const response = await fetch(`/api/restaurantes/${cdRestauranteLogado}/recalcular-notas`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tokenPainel}` }
+            });
 
-        function editProduto(cdProduto, nome, descricao, preco) {
-            document.getElementById('modal-title').textContent = 'Editar Produto';
-            document.getElementById('produto-id').value = cdProduto;
-            document.getElementById('produto-nome').value = nome;
-            document.getElementById('produto-descricao').value = descricao;
-            document.getElementById('produto-preco').value = preco;
-            document.getElementById('produto-modal').classList.add('active');
-        }
-
-        async function deleteProduto(cdProduto) {
-            if (!confirm('Tem certeza que deseja deletar este produto?')) return;
-
-            const token = localStorage.getItem('token');
-            try {
-                const response = await fetch(`/api/produtos/${cdProduto}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    loadProdutos();
-                }
-            } catch (error) {
-                console.error('Erro:', error);
+            if (response.ok) {
+                alert('Sucesso! As notas dos produtos foram recalculadas no banco pelo Cursor.');
+            } else {
+                alert('Erro ao executar a Procedure no banco.');
             }
+        } catch (error) {
+            console.error('Erro:', error);
         }
+    }
 
-        document.getElementById('produto-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const token = localStorage.getItem('token');
-            const produtoId = document.getElementById('produto-id').value;
-            const produto = {
-                nome: document.getElementById('produto-nome').value,
-                descricao: document.getElementById('produto-descricao').value,
-                preco: parseFloat(document.getElementById('produto-preco').value),
-                cdRestaurante: restauranteCd,
-                nota: 0.0
-            };
-
-            try {
-                let response;
-                if (produtoId) {
-                    response = await fetch(`/api/produtos/${produtoId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify(produto)
-                    });
-                } else {
-                    response = await fetch('/api/produtos', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify(produto)
-                    });
-                }
-
-                if (response.ok) {
-                    closeProdutoModal();
-                    loadProdutos();
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const decoded = parseJwt(token);
-            if (!decoded) {
-                logout();
-                return;
-            }
-
-            loadRestaurante();
-        });
-    </script>
+    document.addEventListener('DOMContentLoaded', inicializarPainel);
+</script>
 </body>
 </html>

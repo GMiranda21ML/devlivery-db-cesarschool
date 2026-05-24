@@ -39,9 +39,9 @@ public class SecurityConfigurations {
                                 "/*.html",
                                 "/css/**",
                                 "/js/**",
-                                "/images/**",
-                                "/favicon.ico"
+                                "/images/**"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/favicon.ico").permitAll()
 
                         // 2. CADASTROS E LOGIN (Tudo Público)
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
@@ -55,6 +55,8 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.GET, "/api/restaurantes/**").permitAll() // Vê os detalhes de 1 restaurante
                         .requestMatchers(HttpMethod.GET, "/api/produtos/restaurante/**").permitAll() // Vê o cardápio
                         .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/relatorios/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/entregadores/destaques").permitAll()
                         .requestMatchers("/api/home/**").permitAll()
 
                         .requestMatchers("/api/restaurantes/**").hasAnyRole("RESTAURANTE", "PARCEIRO")

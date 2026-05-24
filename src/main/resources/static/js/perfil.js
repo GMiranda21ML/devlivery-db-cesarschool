@@ -261,3 +261,30 @@ async function deleteAccount() {
         console.error("Erro no DELETE:", error);
     }
 }
+
+async function verClientesInativos() {
+    // 1. Pegamos o token de segurança salvo no navegador
+    const token = localStorage.getItem('token');
+
+    try {
+        const res = await fetch('/api/relatorios/clientes-inativos', {
+            method: 'GET',
+            // 2. Enviamos o token no cabeçalho para o Spring Security liberar!
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+            const inativos = await res.json();
+            if (inativos.length === 0) {
+                alert("Nenhum resultado. Todos os clientes já fizeram pelo menos um pedido!");
+                return;
+            }
+            const listaNomes = inativos.map(c => `• ${c.nome} (${c.email})`).join('\n');
+            alert("RESULTADO DA QUERY 3 (CLIENTES INATIVOS):\n\n" + listaNomes);
+        } else {
+            alert("Erro de Segurança: Sem permissão para acessar o banco.");
+        }
+    } catch (error) {
+        console.error("Erro ao buscar inativos:", error);
+    }
+}

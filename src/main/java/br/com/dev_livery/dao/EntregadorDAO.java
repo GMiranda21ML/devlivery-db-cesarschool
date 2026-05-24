@@ -8,6 +8,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import br.com.dev_livery.dto.EntregadorDestaqueDTO;
+import java.util.ArrayList;
+import java.util.List;
+import java.sql.ResultSet;
 
 @Repository
 public class EntregadorDAO {
@@ -159,5 +163,38 @@ public class EntregadorDAO {
                 throw e;
             }
         }
+    }
+
+    public List<EntregadorDestaqueDTO> listarDestaques() throws SQLException {
+
+        // Query EXATAMENTE como está no seu arquivo, sem misturar com a função
+        String sqlQuery = """
+            SELECT 
+                u.NOME, 
+                e.VEICULO, 
+                e.NOTA
+            FROM 
+                ENTREGADOR e
+            JOIN 
+                USUARIO u ON e.CPF = u.CPF
+            WHERE 
+                e.NOTA > (SELECT AVG(NOTA) FROM ENTREGADOR)
+        """;
+
+        List<EntregadorDestaqueDTO> lista = new ArrayList<>();
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sqlQuery);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String nome = rs.getString("NOME");
+                String veiculo = rs.getString("VEICULO");
+                Double nota = rs.getDouble("NOTA");
+
+                lista.add(new EntregadorDestaqueDTO(nome, veiculo, nota, ""));
+            }
+        }
+        return lista;
     }
 }

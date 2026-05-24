@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.CallableStatement;
 
 @Repository
 public class RestauranteDAO {
@@ -194,5 +195,16 @@ public class RestauranteDAO {
             }
         }
         return restaurantes;
+    }
+
+    public void recalcularNotasProdutos(Integer cdRestaurante) throws SQLException {
+        String sql = "{call recalcular_nota_produtos_restaurante(?)}";
+
+        try (Connection conn = dataSource.getConnection();
+             CallableStatement stmt = conn.prepareCall(sql)) {
+
+            stmt.setInt(1, cdRestaurante);
+            stmt.execute();
+        }
     }
 }

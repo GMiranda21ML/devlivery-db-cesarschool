@@ -3,10 +3,12 @@ package br.com.dev_livery.controller;
 import br.com.dev_livery.dao.EntregadorDAO;
 import br.com.dev_livery.dto.EntregadorDTO;
 import br.com.dev_livery.dto.EntregadorResponseDTO;
+import br.com.dev_livery.dto.EntregadorDestaqueDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.sql.SQLException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/entregadores")
@@ -69,6 +71,15 @@ public class EntregadorController {
             return ResponseEntity.ok("Conta de entregador excluída.");
         } catch (SQLException e) {
             return ResponseEntity.internalServerError().body("Erro ao excluir: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/destaques")
+    public ResponseEntity<List<EntregadorDestaqueDTO>> getEntregadoresDestaque() {
+        try {
+            return ResponseEntity.ok(entregadorDAO.listarDestaques());
+        } catch (SQLException e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

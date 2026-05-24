@@ -28,13 +28,18 @@ public class SecurityFilter extends OncePerRequestFilter {
         String token = this.recoverToken(request);
 
         if (token != null) {
-            String email = tokenService.validarToken(token);
-            String role = tokenService.obterRole(token);
+            try {
+                String email = tokenService.validarToken(token);
+                String role = tokenService.obterRole(token);
 
-            if (email != null && !email.isEmpty() && role != null && !role.isEmpty()) {
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (email != null && !email.isEmpty() && role != null && !role.isEmpty()) {
+                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (Exception e) {
+                // Se o token for inválido, apenas ignoramos e deixamos o Spring Security tratar o 403/401
+                SecurityContextHolder.clearContext();
             }
         }
         filterChain.doFilter(request, response);

@@ -1,4 +1,5 @@
-let allRestaurants = [];
+let listaRestaurantesOriginal = [];
+let currentCategory = 'todos';
 let currentFilter = 'Todos';
 let currentSearch = '';
 let currentQuickFilter = 'todos';
@@ -9,7 +10,7 @@ async function carregarCategorias() {
         const response = await fetch('/api/categorias');
         if (response.ok) {
             const categoriasDB = await response.json();
-            renderCategories(categoriasDB); // <-- Corrigido aqui (estava renderFilterButtons)
+            renderCategories(categoriasDB);
         }
     } catch (error) {
         console.error('Erro ao buscar categorias do banco:', error);
@@ -26,7 +27,6 @@ function renderCategories(categorias) {
         card.className = 'category-card';
         card.style.cursor = 'pointer';
 
-        // Puxa a imagem local baseada no ID (ex: cat_1.jpg, cat_2.jpg)
         const bgImage = `/images/cat/cat_${category.cdCategoria}.jpg`;
 
         card.onclick = () => {
@@ -34,15 +34,19 @@ function renderCategories(categorias) {
             const searchInput = document.querySelector('.search-bar input');
             if(searchInput) searchInput.value = '';
 
+            // Tira a seleção dos botões de filtro e volta para o "Todos"
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
-                if(btn.textContent.trim() === category.nome) btn.classList.add('active');
             });
+            const btnTodos = document.querySelector('.quick-filter[data-filter="todos"]');
+            if(btnTodos) btnTodos.classList.add('active');
+            currentQuickFilter = 'todos';
 
-            carregarRestaurantes(category.nome);
+            // SALVA O NOME E BUSCA DIRETO DA API!
+            currentCategory = category.nome;
+            carregarRestaurantes(currentCategory);
         };
 
-        // O 'onerror' garante que se não achar a foto na pasta, carrega uma cinza padrão
         card.innerHTML = `
             <img src="${bgImage}" alt="${category.nome}" class="category-img" onerror="this.src='https://via.placeholder.com/200?text=Sem+Foto'">
             <span class="category-name">${category.nome}</span>
@@ -51,25 +55,21 @@ function renderCategories(categorias) {
     });
 }
 
-async function carregarRestaurantes(categoria = 'Todos') {
+// AGORA A FUNÇÃO SABE BUSCAR POR CATEGORIA NO BACKEND
+async function carregarRestaurantes(categoriaBusca = 'todos') {
     try {
-        // Decide qual rota do Spring Boot chamar
-        let url = '/api/restaurantes';
-        if (categoria !== 'Todos') {
-            url = `/api/restaurantes/categoria/${categoria}`;
-        }
+        // Se for 'todos' chama a rota geral, se tiver categoria chama a rota específica!
+        const url = (categoriaBusca === 'todos')
+            ? '/api/restaurantes'
+            : `/api/restaurantes/categoria/${encodeURIComponent(categoriaBusca)}`;
 
         const response = await fetch(url);
-
         if (response.ok) {
-            allRestaurants = await response.json(); // Salva os dados na memória
-            applyFilters(); // Aplica a filtragem da barra de pesquisa por cima
-        } else {
-            renderRestaurants([]);
+            listaRestaurantesOriginal = await response.json();
+            applyFilters(); // Desenha na tela mantendo filtros rápidos (ex: grátis) se houver
         }
     } catch (error) {
-        console.error('Erro de conexão com o backend:', error);
-        renderRestaurants([]);
+        console.error("Erro ao carregar restaurantes:", error);
     }
 }
 
@@ -122,24 +122,67 @@ function renderRestaurants(restaurantes) {
     });
 }
 
-
 function initFilters() {
     const quickBtns = document.querySelectorAll('.quick-filter');
     const searchInput = document.querySelector('.search-bar input');
 
-    // 1. Filtros Rápidos (Entrega Grátis, Melhores Avaliados)
     quickBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+        // A função precisa ser 'async' para esperar a resposta do banco de dados
+        btn.addEventListener('click', async () => {
             quickBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
-            // Pega o que está escrito no 'data-filter' do HTML (ex: "gratis")
-            currentQuickFilter = btn.dataset.filter;
-            applyFilters();
+            // Pega o filtro clicado (ex: "super", "premium") e converte para minúsculo
+            currentQuickFilter = btn.dataset.filter.toLowerCase();
+
+            if (currentQuickFilter === 'todos' && currentCategory !== 'todos') {
+                currentCategory = 'todos';
+                carregarRestaurantes('todos');
+            }
+            // =================================================================
+            // INTERAÇÃO PURA COM O BANCO: QUERY 1 (Super Restaurantes)
+            // =================================================================
+            // =================================================================
+                        // INTERAÇÃO PURA COM O BANCO: QUERY 1 (Super Restaurantes)
+                        // =================================================================
+                        else if (currentQuickFilter === 'super') {
+                            try {
+                                const token = localStorage.getItem('token');
+                                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+                                const res = await fetch('/api/relatorios/super-restaurantes', { headers });
+                                if (res.ok) {
+                                    const nomesSuper = await res.json();
+                                    const filtrados = listaRestaurantesOriginal.filter(r => nomesSuper.includes(r.nome));
+                                    renderRestaurants(filtrados);
+                                } else {
+                                    console.error("Bloqueado pelo Spring Security (403)");
+                                }
+                            } catch (e) { console.error("Erro ao buscar Query 1:", e); }
+                        }
+                        // =================================================================
+                        // INTERAÇÃO PURA COM O BANCO: QUERY 4 (Produtos Premium)
+                        // =================================================================
+                        else if (currentQuickFilter === 'premium') {
+                            try {
+                                const token = localStorage.getItem('token');
+                                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+                                const res = await fetch('/api/relatorios/produtos-premium', { headers });
+                                if (res.ok) {
+                                    const produtosPremium = await res.json();
+                                    renderProdutosPremium(produtosPremium);
+                                } else {
+                                     console.error("Bloqueado pelo Spring Security (403)");
+                                }
+                            } catch (e) { console.error("Erro ao buscar Query 4:", e); }
+                        }
+            else {
+                applyFilters(); // Aplica filtros simples da tela (grátis, rápidos)
+            }
         });
     });
 
-    // 2. Barra de Pesquisa
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             currentSearch = e.target.value.toLowerCase();
@@ -147,61 +190,90 @@ function initFilters() {
         });
     }
 
-    // 3. Lógica do Modal de Filtros Avançados
+    // Modal de Filtros Avançados
     const modal = document.getElementById('modal-filtros');
     const btnOpen = document.getElementById('btn-filtros-avancados');
     const btnClose = document.querySelector('.close-modal');
     const btnApply = document.getElementById('aplicar-filtros-avancados');
-
     const rangeNota = document.getElementById('filtro-nota');
     const labelNota = document.getElementById('valor-nota');
     const rangeFrete = document.getElementById('filtro-frete');
     const labelFrete = document.getElementById('valor-frete');
 
     if(btnOpen && modal) {
-        // Abrir/Fechar Modal
         btnOpen.onclick = () => modal.style.display = 'flex';
         btnClose.onclick = () => modal.style.display = 'none';
         window.onclick = (e) => { if(e.target === modal) modal.style.display = 'none'; };
 
-        // Atualizar textos dos sliders em tempo real
         rangeNota.oninput = () => labelNota.textContent = rangeNota.value > 0 ? `Acima de ${rangeNota.value}` : 'Todas';
         rangeFrete.oninput = () => labelFrete.textContent = rangeFrete.value < 30 ? `Até R$ ${rangeFrete.value},00` : 'Qualquer valor';
 
-        // Aplicar botão do modal
         btnApply.onclick = () => {
             advancedFilters.minNota = parseFloat(rangeNota.value);
             advancedFilters.maxFrete = parseFloat(rangeFrete.value);
-
-            // Se usou filtro avançado, tira o highlight dos filtros rápidos para não confundir
             quickBtns.forEach(b => b.classList.remove('active'));
             currentQuickFilter = 'todos';
-
             modal.style.display = 'none';
             applyFilters();
         };
     }
 }
 
-function applyFilters() {
-    let filtrados = allRestaurants;
+// =================================================================
+// FUNÇÃO PARA EXIBIR A QUERY 4 (Adicione no final do arquivo)
+// =================================================================
+function renderProdutosPremium(produtos) {
+    const container = document.getElementById('restaurants-container');
+    if (!container) return;
+    container.innerHTML = '';
 
-    // 1. Filtro da Barra de Pesquisa (Texto)
+    if (!produtos || produtos.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px 0;">Nenhum produto superou a média de preços.</p>';
+        return;
+    }
+
+    produtos.forEach((prod) => {
+        const card = document.createElement('div');
+        card.className = 'restaurant-card';
+        card.style.display = 'flex';
+        card.style.alignItems = 'center';
+        card.style.padding = '20px';
+        card.style.gap = '15px';
+
+        card.innerHTML = `
+            <div style="width: 50px; height: 50px; background: #e8f8f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #2ecc71; font-size: 20px;">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <div style="flex: 1;">
+                <h4 style="margin: 0; font-size: 1.1rem; color: #333;">${prod.nome}</h4>
+                <span style="color: #ea1d2c; font-weight: bold; display: block; margin-top: 5px;">
+                    R$ ${prod.preco.toFixed(2).replace('.', ',')}
+                </span>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function applyFilters() {
+    let filtrados = listaRestaurantesOriginal;
+
+    // O filtro local de categoria foi removido porque a API já envia a lista correta!
+
     if (currentSearch) {
         filtrados = filtrados.filter(rest =>
             rest.nome && rest.nome.toLowerCase().includes(currentSearch)
         );
     }
 
-    // 2. Filtros Rápidos (Botões)
     if (currentQuickFilter === 'gratis') {
         filtrados = filtrados.filter(rest => rest.taxaEntrega === 0);
-    } else if (currentQuickFilter === 'melhores') {
-        // Supondo que "melhores" seja nota >= 4.5
-        filtrados = filtrados.filter(rest => rest.nota >= 4.5);
+    } else if (currentQuickFilter === 'avaliados' || currentQuickFilter === 'melhores') {
+        filtrados = [...filtrados].sort((a, b) => b.nota - a.nota);
+    } else if (currentQuickFilter === 'rapidos') {
+        filtrados = [...filtrados].sort((a, b) => parseInt(a.tempoEntrega || 999) - parseInt(b.tempoEntrega || 999));
     }
 
-    // 3. Filtros Avançados (Modal)
     if (advancedFilters.minNota > 0) {
         filtrados = filtrados.filter(rest => rest.nota >= advancedFilters.minNota);
     }
@@ -209,10 +281,8 @@ function applyFilters() {
         filtrados = filtrados.filter(rest => rest.taxaEntrega <= advancedFilters.maxFrete);
     }
 
-    // Após filtrar a lista, atualiza a tela
     renderRestaurants(filtrados);
 }
-
 
 function parseJwt(token) {
     try {
@@ -227,7 +297,6 @@ function parseJwt(token) {
     }
 }
 
-// Função para deslogar
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('cart');
@@ -240,7 +309,6 @@ function checkAuthAndUpdateUI() {
     const addressSelector = document.getElementById('address-selector');
 
     if (!token) {
-        // --- USUÁRIO DESLOGADO ---
         if (addressSelector) addressSelector.style.display = 'none';
 
         if (navActions) {
@@ -258,30 +326,27 @@ function checkAuthAndUpdateUI() {
         return;
     }
 
-    // --- USUÁRIO LOGADO ---
     const decoded = parseJwt(token);
     if (!decoded) {
         logout();
         return;
     }
 
-    // 2. Lida com o bloco de endereço
     const cpfDoUsuario = decoded.sub;
     const role = decoded.role;
 
-    // 1. Atualiza a Navbar: Tira o "Entrar", coloca "Perfil" e "Sair" (Aparece para AMBOS)
     if (navActions) {
         let navContent = '';
-        
+
         if (role === 'parceiro') {
             navContent += `
-                <a href="criar-restaurante.html" class="btn-icon" style="text-decoration: none; color: #1da55a;">
+                <a href="painel-restaurante.html" class="btn-icon" style="text-decoration: none; color: #1da55a;">
                     <i class="fa-solid fa-store"></i>
-                    <span>Criar Restaurante</span>
+                    <span>Painel Loja</span>
                 </a>
             `;
         }
-        
+
         navContent += `
             <a href="perfil.html" class="btn-icon" style="text-decoration: none;">
                 <i class="fa-solid fa-user"></i>
@@ -292,7 +357,7 @@ function checkAuthAndUpdateUI() {
                 <span>Sair</span>
             </button>
         `;
-        
+
         if (role === 'cliente') {
             navContent += `
                 <button class="btn-icon cart-btn" onclick="openCart()" aria-label="Carrinho">
@@ -301,7 +366,7 @@ function checkAuthAndUpdateUI() {
                 </button>
             `;
         }
-        
+
         navActions.innerHTML = navContent;
     }
 
@@ -309,7 +374,6 @@ function checkAuthAndUpdateUI() {
         const addressInfo = addressSelector.querySelector('.address');
 
         if (role === 'cliente') {
-            // MOSTRA o endereço se for cliente
             addressSelector.style.display = 'flex';
 
             fetch(`/api/clientes/buscar-endereco/${cpfDoUsuario}`, {
@@ -331,7 +395,6 @@ function checkAuthAndUpdateUI() {
             });
 
         } else if (role === 'entregador') {
-            // ESCONDE o endereço se for entregador
             addressSelector.style.display = 'none';
         }
     }
@@ -344,7 +407,6 @@ function initCategoryScroll() {
 
     if (!container || !leftBtn || !rightBtn) return;
 
-    // Quantidade de pixels que a tela vai pular a cada clique
     const scrollAmount = 350;
 
     leftBtn.addEventListener('click', () => {
@@ -355,7 +417,6 @@ function initCategoryScroll() {
         container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     });
 
-    // Mostra/Esconde a seta da esquerda dependendo de onde o scroll está
     container.addEventListener('scroll', () => {
         if (container.scrollLeft > 10) {
             leftBtn.style.display = 'flex';
@@ -364,11 +425,44 @@ function initCategoryScroll() {
         }
     });
 
-    // Inicia escondendo a seta da esquerda (já que começa no pixel 0)
     leftBtn.style.display = 'none';
 }
 
-// Cart functions
+async function carregarEntregadoresDestaque() {
+    try {
+        const response = await fetch('/api/entregadores/destaques');
+        if (response.ok) {
+            const entregadores = await response.json();
+            const container = document.getElementById('entregadores-container');
+            if(!container) return;
+
+            container.innerHTML = '';
+
+            if(entregadores.length === 0) {
+                 container.innerHTML = '<p style="color: #666; padding: 20px;">Nenhum destaque no momento.</p>';
+                 return;
+            }
+
+            entregadores.forEach(ent => {
+                container.innerHTML += `
+                    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 200px; text-align: center;">
+                        <div style="width: 60px; height: 60px; background: #ffe4e4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: var(--primary-color); font-size: 24px;">
+                            <i class="fa-solid fa-helmet-safety"></i>
+                        </div>
+                        <h4 style="margin: 0 0 5px 0;">${ent.nome}</h4>
+                        <p style="margin: 0; font-size: 14px; color: #666;">${ent.veiculo}</p>
+                        <div style="margin-top: 10px; font-weight: bold; color: #f1c40f;">
+                            <i class="fa-solid fa-star"></i> ${ent.nota.toFixed(1)}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar entregadores:', error);
+    }
+}
+
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
 function getCartCount() {
@@ -379,11 +473,11 @@ function openCart() {
     window.location.href = 'checkout.html';
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
     carregarCategorias();
-    carregarRestaurantes();
+    carregarRestaurantes(); // Inicia sem categoria = busca todos
     initFilters();
     checkAuthAndUpdateUI();
     initCategoryScroll();
+    carregarEntregadoresDestaque();
 });
