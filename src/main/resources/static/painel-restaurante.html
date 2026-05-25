@@ -15,7 +15,16 @@
         <i class="fa-solid fa-burger nav-brand-icon"></i>
         <span class="nav-brand-text">Dev<span class="nav-brand-highlight">Livery</span> Parceiros</span>
     </div>
-    <div class="nav-actions" id="nav-actions">
+    <div class="nav-actions" id="nav-actions" style="display: flex; gap: 10px; align-items: center;">
+        <button onclick="window.location.href='index.html'" style="background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+            <i class="fa-solid fa-arrow-left"></i> Início
+        </button>
+        <button onclick="window.location.href='perfil.html'" style="background: #f1f3f5; border: none; color: #333; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+            <i class="fa-solid fa-user"></i> Meu Perfil
+        </button>
+        <button onclick="localStorage.removeItem('token'); window.location.href='login.html'" style="background: #fff5f5; border: none; color: #e03131; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+            <i class="fa-solid fa-right-from-bracket"></i> Sair
+        </button>
     </div>
 </nav>
 
@@ -48,6 +57,45 @@
     <h2><i class="fa-solid fa-clock"></i> Pedidos Pendentes (Query 2)</h2>
     <div id="lista-pedidos-pendentes" class="pedidos-grid">
         <p>Carregando pedidos...</p>
+    </div>
+    <div class="menu-header" style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; margin-bottom: 20px;">
+        <h2><i class="fa-solid fa-utensils"></i> O Meu Cardápio</h2>
+        <button class="btn-primary" onclick="abrirModalProduto()" style="background-color: var(--primary-color); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(234, 29, 44, 0.2);">
+            <i class="fa-solid fa-plus"></i> Novo Produto
+        </button>
+    </div>
+
+    <div id="lista-produtos" class="produtos-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+        <p>A carregar o cardápio...</p>
+    </div>
+
+    <div id="modal-produto" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+        <div class="modal-content" style="background-color: white; margin: 10% auto; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <span class="close" onclick="fecharModalProduto()" style="float: right; font-size: 28px; cursor: pointer; color: #666;">&times;</span>
+            <h2 id="modal-titulo" style="margin-bottom: 20px; color: #333;">Adicionar Produto</h2>
+
+            <form id="form-produto" onsubmit="salvarProduto(event)">
+                <input type="hidden" id="prod-id">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Nome do Produto</label>
+                    <input type="text" id="prod-nome" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Descrição</label>
+                    <textarea id="prod-desc" required rows="3" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; resize: vertical;"></textarea>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Preço (R$)</label>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;"></label>
+                        <input type="number" step="0.01" min="0" id="prod-preco" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+                    </div>
+                </div>
+                <button type="submit" style="width: 100%; background-color: #2ecc71; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
+                    <i class="fa-solid fa-check"></i> Guardar Produto
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -193,6 +241,148 @@
     }
 
     document.addEventListener('DOMContentLoaded', inicializarPainel);
+    async function carregarProdutos() {
+        if(!cdRestauranteLogado) return;
+
+        try {
+            // Chama o endpoint GET /api/produtos/restaurante/{id} que você criou no Java
+            const response = await fetch(`/api/produtos/restaurante/${cdRestauranteLogado}`, {
+                headers: { 'Authorization': `Bearer ${tokenPainel}` }
+            });
+
+            const container = document.getElementById('lista-produtos');
+
+            if (response.ok) {
+                const produtos = await response.json();
+
+                if (produtos.length === 0) {
+                    container.innerHTML = '<p class="empty-state">O seu cardápio está vazio. Adicione novos produtos!</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                produtos.forEach(prod => {
+                    // Design moderno para o card do produto
+                    container.innerHTML += `
+                        <div class="produto-card" style="background: white; border: 1px solid #eee; border-radius: 12px; padding: 20px; position: relative; transition: all 0.3s ease;">
+                            <h3 style="margin-top: 0; color: #333;">${prod.nome}</h3>
+                            <p style="color: #777; font-size: 14px; min-height: 40px;">${prod.descricao}</p>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                                <strong style="font-size: 18px; color: var(--primary-color);">R$ ${prod.preco.toFixed(2).replace('.', ',')}</strong>
+                                <span style="background: #fff8e1; color: #f5b041; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;"><i class="fa-solid fa-star"></i> ${prod.nota ? prod.nota.toFixed(1) : '0.0'}</span>
+                            </div>
+                            <div class="acoes-produto" style="display: flex; gap: 10px; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                                <button onclick="editarProduto(${prod.cdProduto}, '${prod.nome.replace(/'/g, "\\'")}', '${prod.descricao.replace(/'/g, "\\'")}', ${prod.preco})" style="flex: 1; background: #f1f3f5; color: #495057; border: none; padding: 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;">
+                                    <i class="fa-solid fa-pen"></i> Editar
+                                </button>
+                                <button onclick="apagarProduto(${prod.cdProduto})" style="flex: 1; background: #fff5f5; color: #e03131; border: none; padding: 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;">
+                                    <i class="fa-solid fa-trash"></i> Apagar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao buscar produtos:', error);
+        }
+    }
+
+    // Modal Controle
+    function abrirModalProduto() {
+        document.getElementById('form-produto').reset();
+        document.getElementById('prod-id').value = '';
+        document.getElementById('modal-titulo').textContent = 'Adicionar Novo Produto';
+        document.getElementById('modal-produto').style.display = 'block';
+    }
+
+    function fecharModalProduto() {
+        document.getElementById('modal-produto').style.display = 'none';
+    }
+
+    function editarProduto(id, nome, desc, preco) {
+        document.getElementById('prod-id').value = id;
+        document.getElementById('prod-nome').value = nome;
+        document.getElementById('prod-desc').value = desc;
+        document.getElementById('prod-preco').value = preco;
+        document.getElementById('modal-titulo').textContent = 'Editar Produto';
+        document.getElementById('modal-produto').style.display = 'block';
+    }
+
+    // Criar / Atualizar
+    async function salvarProduto(event) {
+        event.preventDefault();
+
+        // Bloqueio extra contra valores negativos (caso tentem colar um número com -)
+        const precoInput = parseFloat(document.getElementById('prod-preco').value);
+        if (precoInput < 0) {
+            alert('Erro: O preço não pode ser negativo!');
+            return;
+        }
+
+        if (!cdRestauranteLogado) {
+            alert('Erro: O sistema ainda não carregou o seu restaurante. Aguarde um segundo e tente novamente.');
+            return;
+        }
+
+        const id = document.getElementById('prod-id').value;
+        const produtoDTO = {
+            nome: document.getElementById('prod-nome').value,
+            descricao: document.getElementById('prod-desc').value,
+            preco: precoInput,
+            cdRestaurante: cdRestauranteLogado,
+            nota: 0.0 // Forçamos o envio da nota a 0 para que o Java não dê erro ao ler o DTO
+        };
+
+        const isEdicao = id !== '';
+        const url = isEdicao ? `/api/produtos/${id}` : '/api/produtos';
+        const method = isEdicao ? 'PUT' : 'POST';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tokenPainel}`
+                },
+                body: JSON.stringify(produtoDTO)
+            });
+
+            if (response.ok) {
+                fecharModalProduto();
+                carregarProdutos(); // Recarrega a lista para mostrar o novo produto
+                alert(isEdicao ? 'Produto atualizado com sucesso!' : 'Produto criado com sucesso!');
+            } else {
+                // Em vez de um erro genérico, vamos extrair a mensagem real enviada pelo Spring Boot!
+                const erroMensagem = await response.text();
+                console.error('Erro da API:', response.status, erroMensagem);
+                alert(`Erro ${response.status} do Servidor: ${erroMensagem}`);
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro de comunicação com a base de dados. O servidor pode estar desligado.');
+        }
+    }
+
+    // Deletar
+    async function apagarProduto(id) {
+        if(!confirm('Tem a certeza que deseja apagar este produto?')) return;
+
+        try {
+            const response = await fetch(`/api/produtos/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${tokenPainel}` }
+            });
+
+            if (response.ok) {
+                carregarProdutos();
+            } else {
+                alert('Erro ao apagar o produto. Talvez ele já esteja num pedido.');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+        }
+    }
 </script>
 </body>
 </html>

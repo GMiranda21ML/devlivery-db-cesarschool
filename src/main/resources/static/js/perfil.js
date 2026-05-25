@@ -62,23 +62,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (currentRole === 'cliente') {
         if (btnEntregador) btnEntregador.style.display = 'none';
-        if (btnCliente) {
-            btnCliente.classList.add('active');
-            btnCliente.onclick = null;
-            btnCliente.style.cursor = 'default';
-        }
     } else if (currentRole === 'entregador') {
         if (btnCliente) btnCliente.style.display = 'none';
-        if (btnEntregador) {
-            btnEntregador.classList.add('active');
-            btnEntregador.onclick = null;
-            btnEntregador.style.cursor = 'default';
-        }
+    } else if (currentRole === 'parceiro') {
+        // Esconde os botões de cliente e entregador se for parceiro
+        if (btnCliente) btnCliente.style.display = 'none';
+        if (btnEntregador) btnEntregador.style.display = 'none';
     }
 
     try {
-        const endpoint = currentRole === 'cliente' ? `/api/clientes/${cpf}` : `/api/entregadores/${cpf}`;
-        
+        let endpoint = '';
+        if (currentRole === 'cliente') {
+            endpoint = `/api/clientes/${cpf}`;
+        } else if (currentRole === 'entregador') {
+            endpoint = `/api/entregadores/${cpf}`;
+        } else if (currentRole === 'parceiro') {
+            endpoint = `/api/parceiros/${cpf}`; // O 'cpf' aqui na verdade guarda o email do parceiro, que vem do token
+        }
+
         const response = await fetch(endpoint, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` }
@@ -88,8 +89,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
             renderRealData(data, currentRole);
         } else {
-            alert('Sua sessão expirou ou os dados não foram encontrados.');
-            logout();
+            // Em vez de expulsar, vamos ver qual é o erro real que o Java está a enviar!
+            const errorMsg = await response.text();
+            console.error("Erro da API:", response.status, errorMsg);
+            alert(`Erro ${response.status}: Não foi possível carregar os dados do Parceiro. Verifique se a rota ${endpoint} está configurada no seu Controller.`);
         }
     } catch (error) {
         console.error('Erro ao buscar perfil:', error);
@@ -112,19 +115,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function renderRealData(data, role) {
-    document.getElementById('display-nome').textContent = data.nome;
-    
+    document.getElementById('display-nome').textContent = data.nome || 'Usuário';
+
     const roleBadge = document.getElementById('display-role');
-    roleBadge.textContent = role === 'cliente' ? 'Cliente' : 'Entregador';
-    roleBadge.style.backgroundColor = role === 'cliente' ? 'rgba(234, 29, 44, 0.1)' : 'rgba(33, 150, 243, 0.1)';
-    roleBadge.style.color = role === 'cliente' ? 'var(--primary-color)' : '#2196f3';
+    if (role === 'cliente') {
+        roleBadge.textContent = 'Cliente';
+        roleBadge.style.backgroundColor = 'rgba(234, 29, 44, 0.1)';
+        roleBadge.style.color = 'var(--primary-color)';
+    } else if (role === 'entregador') {
+        roleBadge.textContent = 'Entregador';
+        roleBadge.style.backgroundColor = 'rgba(33, 150, 243, 0.1)';
+        roleBadge.style.color = '#2196f3';
+    } else if (role === 'parceiro') {
+        roleBadge.textContent = 'Parceiro';
+        roleBadge.style.backgroundColor = 'rgba(255, 152, 0, 0.1)';
+        roleBadge.style.color = '#ff9800'; // Cor Laranja para o parceiro
+    }
 
-    document.getElementById('display-nome-val').textContent = data.nome;
+    document.getElementById('display-nome-val').textContent = data.nome || '-';
 
-    const cpfFormatado = data.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-    document.getElementById('display-cpf').textContent = cpfFormatado;
-    
-    document.getElementById('display-email').textContent = data.email;
+    const cpfFormatado = (data.cpf || '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    document.getElementById('display-cpf').textContent = cpfFormatado || '-';
+
+    document.getElementById('display-email').textContent = data.email || '-';
     document.getElementById('display-telefone').textContent = data.telefone || 'Não informado';
 
     const cardCliente = document.getElementById('card-cliente');
