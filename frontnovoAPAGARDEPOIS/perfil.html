@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - Dev-livery</title>
+    <!-- Reaproveitando as cores e fontes do estilo principal -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="perfil.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Cabeçalho (Navbar) -->
+    <header class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="logo" style="text-decoration: none;">
+                <i class="fa-solid fa-motorcycle"></i>
+                <h1>Dev-livery</h1>
+            </a>
+
+            <div class="nav-actions">
+                <a href="index.html" class="btn-icon" aria-label="Sair" style="text-decoration: none;">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Sair</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container perfil-container">
+        <!-- Simulação de visualização (Para fins de protótipo) -->
+        <div class="dev-toggle-view">
+            <span>Visualizar perfil como: </span>
+            <button onclick="loadProfile('cliente')" id="btn-cliente" class="toggle-btn active">Cliente</button>
+            <button onclick="loadProfile('entregador')" id="btn-entregador" class="toggle-btn">Entregador</button>
+        </div>
+
+        <div class="perfil-layout">
+            <!-- Barra Lateral do Perfil -->
+            <aside class="perfil-sidebar">
+                <div class="avatar-container">
+                    <i class="fa-solid fa-circle-user avatar-icon"></i>
+                </div>
+                <h2 id="display-nome">Carregando...</h2>
+                <span id="display-role" class="role-badge">Cliente</span>
+                
+                <div class="sidebar-actions">
+                    <button class="btn-edit-profile" id="btn-edit" onclick="toggleEditMode()">
+                        <i class="fa-solid fa-pen"></i> Editar Perfil
+                    </button>
+                    <button class="btn-save-profile hidden" id="btn-save" onclick="saveProfile()">
+                        <i class="fa-solid fa-check"></i> Salvar Alterações
+                    </button>
+                    <button class="btn-cancel-profile hidden" id="btn-cancel" onclick="toggleEditMode()">
+                        <i class="fa-solid fa-xmark"></i> Cancelar
+                    </button>
+                    <button class="btn-delete-profile" id="btn-delete" onclick="openDeleteModal()">
+                        <i class="fa-solid fa-trash"></i> Deletar Conta
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Conteúdo Principal do Perfil -->
+            <section class="perfil-content">
+                
+                <!-- Dados Gerais (Tabelas USUARIO e TELEFONE) -->
+                <div class="info-card">
+                    <div class="card-header">
+                        <h3><i class="fa-regular fa-address-card"></i> Dados Pessoais</h3>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Nome Completo</span>
+                            <span class="value view-data" id="display-nome-val">-</span>
+                            <input type="text" class="form-control edit-data hidden" id="input-nome">
+                        </div>
+                        <div class="info-item">
+                            <span class="label">CPF</span>
+                            <span class="value view-data" id="display-cpf">-</span>
+                            <input type="text" class="form-control edit-data hidden" id="input-cpf">
+                        </div>
+                        <div class="info-item">
+                            <span class="label">E-mail</span>
+                            <span class="value view-data" id="display-email">-</span>
+                            <input type="email" class="form-control edit-data hidden" id="input-email">
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Telefone</span>
+                            <span class="value view-data" id="display-telefone">-</span>
+                            <input type="tel" class="form-control edit-data hidden" id="input-telefone">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados do Cliente (Tabela CLIENTE) -->
+                <div class="info-card" id="card-cliente">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-location-dot"></i> Endereço de Entrega</h3>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">CEP</span>
+                            <span class="value view-data" id="display-cep">-</span>
+                            <input type="text" class="form-control edit-data hidden" id="input-cep">
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Rua</span>
+                            <span class="value view-data" id="display-rua">-</span>
+                            <input type="text" class="form-control edit-data hidden" id="input-rua">
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Número</span>
+                            <span class="value view-data" id="display-numero">-</span>
+                            <input type="text" class="form-control edit-data hidden" id="input-numero">
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Bairro</span>
+                            <span class="value view-data" id="display-bairro">-</span>
+                            <input type="text" class="form-control edit-data hidden" id="input-bairro">
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Cidade</span>
+                            <span class="value view-data" id="display-cidade">-</span>
+                            <input type="text" class="form-control edit-data hidden" id="input-cidade">
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Convidado por (CPF)</span>
+                            <span class="value" id="display-convidado">-</span>
+                            <!-- Convidado não é editável pelo usuário -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados do Entregador (Tabela ENTREGADOR) -->
+                <div class="info-card hidden" id="card-entregador">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-motorcycle"></i> Dados do Veículo</h3>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Veículo</span>
+                            <span class="value view-data" id="display-veiculo">-</span>
+                            <select class="form-control edit-data hidden" id="input-veiculo">
+                                <option value="Moto">Moto</option>
+                                <option value="Bicicleta">Bicicleta</option>
+                                <option value="Carro">Carro</option>
+                            </select>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Placa</span>
+                            <span class="value view-data" id="display-placa">-</span>
+                            <input type="text" class="form-control edit-data hidden" id="input-placa">
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Nota (Avaliação)</span>
+                            <div class="value rating">
+                                <i class="fa-solid fa-star"></i>
+                                <span id="display-nota">-</span>
+                            </div>
+                            <!-- Nota não é editável pelo usuário -->
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal de Confirmação de Deleção -->
+    <div id="delete-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3>Deletar Conta?</h3>
+            <p>Esta ação não pode ser desfeita. Todos os seus dados, histórico de pedidos e informações serão apagados permanentemente.</p>
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" onclick="closeModal()">Cancelar</button>
+                <button class="btn-modal-danger" onclick="deleteAccount()">Sim, deletar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="perfil.js"></script>
+</body>
+</html>

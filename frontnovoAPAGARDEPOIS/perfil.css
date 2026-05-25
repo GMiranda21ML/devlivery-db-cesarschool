@@ -1,0 +1,428 @@
+/* Estilos Específicos para a Tela de Perfil */
+
+.perfil-container {
+    padding-top: 40px;
+    padding-bottom: 60px;
+}
+
+/* Toggle de Simulação */
+.dev-toggle-view {
+    background-color: var(--white);
+    padding: 15px 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.toggle-btn {
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text-dark);
+}
+
+.toggle-btn.active {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+}
+
+/* Layout do Perfil */
+.perfil-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+/* Barra Lateral (Sidebar) */
+.perfil-sidebar {
+    background-color: var(--white);
+    padding: 40px 20px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.avatar-container {
+    width: 120px;
+    height: 120px;
+    background-color: var(--bg-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: var(--text-muted);
+    border: 3px solid var(--white);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.avatar-icon {
+    font-size: 4.5rem;
+}
+
+.perfil-sidebar h2 {
+    font-size: 1.4rem;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.role-badge {
+    background-color: rgba(234, 29, 44, 0.1);
+    color: var(--primary-color);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Botões da Sidebar */
+.sidebar-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-edit-profile {
+    width: 100%;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+.btn-edit-profile:hover { background-color: var(--border-color); }
+
+.btn-save-profile {
+    width: 100%;
+    background-color: #1da55a;
+    color: var(--white);
+    border: none;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+.btn-save-profile:hover { background-color: #158749; }
+
+.btn-cancel-profile {
+    width: 100%;
+    background-color: var(--white);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+.btn-cancel-profile:hover { background-color: var(--bg-light); }
+
+.btn-delete-profile {
+    width: 100%;
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid transparent;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+.btn-delete-profile:hover {
+    background-color: rgba(234, 29, 44, 0.05);
+    border-color: var(--primary-color);
+}
+
+/* Conteúdo Principal */
+.perfil-content {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.info-card {
+    background-color: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 30px;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-header h3 {
+    font-size: 1.2rem;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.card-header h3 i {
+    color: var(--primary-color);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.info-item .label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-item .value {
+    font-size: 1rem;
+    color: var(--text-dark);
+    font-weight: 500;
+    background-color: var(--bg-light);
+    padding: 10px 15px;
+    border-radius: var(--border-radius);
+    border: 1px solid transparent;
+    min-height: 42px; /* para manter a mesma altura do input */
+    display: flex;
+    align-items: center;
+}
+
+.info-item .value.rating {
+    gap: 8px;
+    color: #e5a300;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* Inputs de Edição */
+.form-control {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: var(--transition);
+    background-color: var(--white);
+    color: var(--text-dark);
+    height: 42px;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(234, 29, 44, 0.1);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Modal de Deleção */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(2px);
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background-color: var(--white);
+    padding: 40px 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.show .modal-content {
+    transform: translateY(0);
+}
+
+.modal-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.modal-content h3 {
+    font-size: 1.4rem;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+}
+
+.modal-content p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.btn-modal-cancel {
+    flex: 1;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-modal-cancel:hover {
+    background-color: var(--border-color);
+}
+
+.btn-modal-danger {
+    flex: 1;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-modal-danger:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Responsividade */
+@media (max-width: 900px) {
+    .perfil-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .perfil-sidebar {
+        flex-direction: row;
+        text-align: left;
+        padding: 25px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .avatar-container {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 0;
+    }
+
+    .avatar-icon {
+        font-size: 3rem;
+    }
+
+    .perfil-sidebar h2 {
+        margin-bottom: 5px;
+    }
+    
+    .sidebar-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .perfil-sidebar {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .sidebar-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .dev-toggle-view {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
