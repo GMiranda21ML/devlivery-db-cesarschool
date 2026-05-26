@@ -472,7 +472,84 @@ function getCartCount() {
 function openCart() {
     window.location.href = 'checkout.html';
 }
+function carregarCarrinho() {
+    const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+    const container = document.getElementById('lista-carrinho');
+    const totalElement = document.getElementById('valor-total');
 
+    container.innerHTML = '';
+    let total = 0;
+
+    carrinho.forEach((item, index) => {
+        total += item.preco;
+        container.innerHTML += `
+            <div class="item-carrinho">
+                <span>${item.nome}</span>
+                <span>R$ ${item.preco.toFixed(2)}</span>
+                <button onclick="removerItem(${index})">Remover</button>
+            </div>
+        `;
+    });
+    totalElement.textContent = total.toFixed(2);
+}
+
+function removerItem(index) {
+    let carrinho = JSON.parse(localStorage.getItem('carrinho'));
+    carrinho.splice(index, 1);
+    localStorage.setItem('carrinho', JSON.stringify(carrinho));
+    carregarCarrinho();
+}
+
+
+async function finalizarPedido() {
+    const carrinho = JSON.parse(localStorage.getItem('carrinho'));
+
+    if (!carrinho || carrinho.length === 0) {
+        alert("O seu carrinho está vazio!");
+        return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const cpfDoCliente = payload.sub;
+
+    const pedidoDTO = {
+        cpfCliente: cpfDoCliente,
+        cdRestaurante: carrinho[0].cdRestaurante,
+        items: carrinho.map(item => ({
+            cdProduto: item.cdProduto,
+            quantidade: item.quantidade || 1
+        }))
+    };
+
+    try {
+        const response = await fetch('/api/pedidos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(pedidoDTO)
+        });
+
+        if (response.ok) {
+            localStorage.removeItem('carrinho'); // Limpa o carrinho após sucesso
+            alert("Pedido realizado com sucesso!");
+            window.location.href = 'meus-pedidos.html'; // Redireciona
+        } else {
+            const msgErro = await response.text();
+            alert("Erro ao finalizar pedido: " + msgErro);
+        }
+    } catch (error) {
+        console.error("Erro na conexão:", error);
+        alert("Erro de conexão com o servidor.");
+    }
+}
 document.addEventListener('DOMContentLoaded', () => {
     carregarCategorias();
     carregarRestaurantes(); // Inicia sem categoria = busca todos
