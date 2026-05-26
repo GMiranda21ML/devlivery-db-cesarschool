@@ -466,40 +466,13 @@ async function carregarEntregadoresDestaque() {
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
 function getCartCount() {
-    return cart.reduce((sum, item) => sum + item.quantidade, 0);
+    const carrinhoAtual = JSON.parse(localStorage.getItem('carrinho')) || [];
+        return carrinhoAtual.reduce((sum, item) => sum + (item.quantidade || 1), 0);
 }
 
 function openCart() {
-    window.location.href = 'checkout.html';
+    window.location.href = 'carrinho.html';
 }
-function carregarCarrinho() {
-    const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
-    const container = document.getElementById('lista-carrinho');
-    const totalElement = document.getElementById('valor-total');
-
-    container.innerHTML = '';
-    let total = 0;
-
-    carrinho.forEach((item, index) => {
-        total += item.preco;
-        container.innerHTML += `
-            <div class="item-carrinho">
-                <span>${item.nome}</span>
-                <span>R$ ${item.preco.toFixed(2)}</span>
-                <button onclick="removerItem(${index})">Remover</button>
-            </div>
-        `;
-    });
-    totalElement.textContent = total.toFixed(2);
-}
-
-function removerItem(index) {
-    let carrinho = JSON.parse(localStorage.getItem('carrinho'));
-    carrinho.splice(index, 1);
-    localStorage.setItem('carrinho', JSON.stringify(carrinho));
-    carregarCarrinho();
-}
-
 
 async function finalizarPedido() {
     const carrinho = JSON.parse(localStorage.getItem('carrinho'));
@@ -550,11 +523,311 @@ async function finalizarPedido() {
         alert("Erro de conexão com o servidor.");
     }
 }
+function adicionarAoCarrinhoReal(cdProduto, nome, preco, cdRestaurante) {
+    let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+
+    const item = {
+        cdProduto: parseInt(cdProduto),
+        nome: nome,
+        preco: parseFloat(preco),
+        cdRestaurante: parseInt(cdRestaurante),
+        quantidade: 1
+    };
+
+    carrinho.push(item);
+    localStorage.setItem('carrinho', JSON.stringify(carrinho));
+
+    alert(`${nome} adicionado ao carrinho com sucesso!`);
+}
+let todosOsPedidosDoCliente = [];
+async function carregarMeusPedidos() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const cpfCliente = payload.sub;
+
+    try {
+        const response = await fetch(`/api/pedidos/cliente/${cpfCliente}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            todosOsPedidosDoCliente = await response.json();
+
+            // Preenche as estatísticas do topo
+            const pendentes = todosOsPedidosDoCliente.filter(p => p.status !== 'Entregue' && p.status !== 'Concluido').length;
+            const concluidos = todosOsPedidosDoCliente.filter(p => p.status === 'Entregue' || p.status === 'Concluido').length;
+
+            const statsContainer = document.getElementById('orders-stats');
+            if(statsContainer) {
+                statsContainer.innerHTML = `
+                    <article class="stat-card"><h3>${todosOsPedidosDoCliente.length}</h3><p>Pedidos totais</p></article>
+                    <article class="stat-card"><h3>${pendentes}</h3><p>Em andamento</p></article>
+                    <article class="stat-card"><h3>${concluidos}</h3><p>Entregues</p></article>
+                `;
+            }
+
+            renderizarListaFiltrada(todosOsPedidosDoCliente);
+        }
+    } catch (error) {
+        console.error("Erro ao carregar pedidos:", error);
+    }
+}
+
+function renderizarListaFiltrada(listaPedidos) {
+    const container = document.getElementById('orders-list');
+    if (!container) return;
+
+    if (listaPedidos.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nenhum pedido encontrado para esta categoria.</div>';
+        return;
+    }
+
+    container.innerHTML = listaPedidos.map(p => {
+        let badgeClass = "status-em-preparo";
+        if(p.status === 'Pendente') badgeClass = "status-pendente";
+        if(p.status === 'Entregue' || p.status === 'Concluido') badgeClass = "status-entregue";
+
+        return `
+            <article class="order-admin-card" style="background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #eee;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                    <div>
+                        <span style="font-size: 11px; color: #ea1d2c; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Pedido #${p.cdPedido}</span>
+                        <h3 style="margin: 3px 0 0 0; color: #2d3748; font-size: 18px;">Dev-livery Delivery</h3>
+                        <p style="margin: 5px 0 0 0; font-size: 13px; color: #718096;"><i class="fa-regular fa-calendar"></i> Feito em: ${p.data}</p>
+                    </div>
+                    <span class="status-badge ${badgeClass}" style="padding: 6px 14px; border-radius: 50px; font-size: 12px; font-weight: 600;">
+                        ${p.status}
+                    </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #edf2f7; padding-top: 15px; margin-top: 15px;">
+                    <span style="color: #4a5568; font-size: 14px;">Total pago</span>
+                    <strong style="font-size: 20px; color: #ea1d2c;">R$ ${p.valorTotal.toFixed(2).replace('.', ',')}</strong>
+                </div>
+            </article>
+        `;
+    }).join('');
+}
+
+function filtrarStatus(statusAlvo) {
+    const chips = document.querySelectorAll('.filter-chip');
+    chips.forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (statusAlvo === 'Todos') {
+        renderizarListaFiltrada(todosOsPedidosDoCliente);
+    } else {
+        const filtrados = todosOsPedidosDoCliente.filter(p => p.status === statusAlvo);
+        renderizarListaFiltrada(filtrados);
+    }
+}
+// --- SISTEMA INTERNO DE GESTÃO DO CARRINHO ---
+let subtotalGlobal = 0;
+let totalComDescontoGlobal = 0;
+
+function renderizarTelaCarrinho() {
+    const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+    const itemsList = document.getElementById('cart-items-list');
+    const summaryList = document.getElementById('cart-summary');
+
+    if (!itemsList) return; // Só roda se estiver na página de carrinho
+
+    if (carrinho.length === 0) {
+        itemsList.innerHTML = '<div class="empty-state">Seu carrinho está vazio. Adicione itens na página inicial!</div>';
+        if(summaryList) summaryList.innerHTML = '';
+        document.getElementById('cart-confirm-btn').disabled = true;
+        return;
+    }
+
+    document.getElementById('cart-confirm-btn').disabled = false;
+    subtotalGlobal = 0;
+
+    // Renderiza a lista de itens escolhidos pelo cliente usando a estrutura do novo CSS
+    itemsList.innerHTML = carrinho.map((item, idx) => {
+        const itemTotal = item.preco * (item.quantidade || 1);
+        subtotalGlobal += itemTotal;
+        return `
+            <div class="cart-item-row" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #edf2f7;">
+                <div>
+                    <h4 style="margin: 0; font-size: 16px; color: #2d3748;">${item.nome}</h4>
+                    <span style="font-size: 13px; color: #718096;">Quantidade: ${item.quantidade || 1}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <strong style="color: #2d3748;">R$ ${itemTotal.toFixed(2).replace('.', ',')}</strong>
+                    <button onclick="removerDoCarrinhoReal(${idx})" style="background: transparent; border: none; color: #e53e3e; cursor: pointer; font-size: 14px;"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    totalComDescontoGlobal = subtotalGlobal;
+    atualizarResumoValores(subtotalGlobal, 0);
+}
+
+function atualizarResumoValores(subtotal, desconto) {
+    const summaryList = document.getElementById('cart-summary');
+    if(!summaryList) return;
+
+    summaryList.innerHTML = `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #718096;">
+            <span>Subtotal</span>
+            <span>R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #38a169; font-weight: 600;">
+            <span>Desconto (Banco Function)</span>
+            <span>- R$ ${desconto.toFixed(2).replace('.', ',')}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 2px dashed #edf2f7; font-size: 18px; font-weight: 700; color: #1a202c;">
+            <span>Total final</span>
+            <span style="color: #ea1d2c;">R$ ${(subtotal - desconto).toFixed(2).replace('.', ',')}</span>
+        </div>
+    `;
+}
+
+function removerDoCarrinhoReal(index) {
+    let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+    carrinho.splice(index, 1);
+    localStorage.setItem('carrinho', JSON.stringify(carrinho));
+    renderizarTelaCarrinho();
+}
+
+// Chamar a FUNCTION do seu MySQL usando a rota do Spring Boot (Ponto 9 resolvido)
+async function calcularCupomBanco() {
+    const cupomTexto = document.getElementById('coupon-code').value.trim();
+    const msgElement = document.getElementById('coupon-message');
+
+    if(!cupomTexto) {
+        msgElement.textContent = "Digite um código de cupom.";
+        msgElement.style.color = "#e53e3e";
+        return;
+    }
+
+    // Configuração simulada baseada nas regras da sua Function calcular_desconto_cupom
+    let tipoCupom = "FIXO";
+    let valorDesconto = 10.00; // R$ 10 de desconto padrão para cupons ativos
+
+    if(cupomTexto.toLowerCase() === 'dev15') {
+        tipoCupom = "PERCENTUAL";
+        valorDesconto = 15.00; // 15% de desconto
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        // Faz a chamada passando os parâmetros esperados pelo @RequestParam do PedidoController
+        const response = await fetch(`/api/pedidos/simular-desconto?valorPedido=${subtotalGlobal}&tipoCupom=${tipoCupom}&valorDesconto=${valorDesconto}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if(response.ok) {
+            const valorFinalComDesconto = await response.json();
+            const descontoCalculado = subtotalGlobal - valorFinalComDesconto;
+
+            totalComDescontoGlobal = valorFinalComDesconto;
+            atualizarResumoValores(subtotalGlobal, descontoCalculado);
+
+            msgElement.textContent = `Cupom '${cupomTexto}' aplicado com sucesso via Function do MySQL!`;
+            msgElement.style.color = "#38a169";
+        } else {
+            msgElement.textContent = "Cupom inválido ou expirado.";
+            msgElement.style.color = "#e53e3e";
+        }
+    } catch (error) {
+        console.error("Erro na Function:", error);
+    }
+}
+
+// Dispara o carregamento do carrinho na abertura
+document.addEventListener('DOMContentLoaded', () => {
+    if(document.body.getAttribute('data-page') === 'carrinho') {
+        renderizarTelaCarrinho();
+    }
+});
+function atualizarNavbarPorRole() {
+    const navActions = document.getElementById('nav-actions');
+    if (!navActions) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        navActions.innerHTML = `
+            <a href="login.html" class="btn-icon" style="text-decoration: none;">
+                <i class="fa-regular fa-user"></i>
+                <span>Entrar</span>
+            </a>
+        `;
+        return;
+    }
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const role = payload.role; // 'cliente' ou 'parceiro'
+
+    if (role === 'parceiro') {
+        navActions.innerHTML = `
+            <a href="painel-restaurante.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                <i class="fa-solid fa-store" style="color: #ea1d2c;"></i>
+                <span>Meu Painel</span>
+            </a>
+            <a href="perfil.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                <i class="fa-regular fa-circle-user"></i>
+                <span>Perfil</span>
+            </a>
+            <button class="btn-icon" onclick="logout()" style="color: var(--primary-color); display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Sair</span>
+            </button>
+        `;
+    } else {
+            navActions.innerHTML = `
+                <a href="carrinho.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                    <i class="fa-solid fa-basket-shopping" style="color: #ea1d2c;"></i>
+                    <span>Carrinho</span>
+                </a>
+                <a href="meus-pedidos.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span>Meus Pedidos</span>
+                </a>
+                <a href="perfil.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                    <i class="fa-regular fa-circle-user"></i>
+                    <span>Perfil</span>
+                </a>
+                <button class="btn-icon" onclick="logout()" style="background:none; border:none; cursor:pointer; color: var(--primary-color); display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Sair</span>
+                </button>
+            `;
+        }
+}
+function controlarVisibilidadeNavbar() {
+    const token = localStorage.getItem('token');
+    const linkPedidos = document.getElementById('link-pedidos');
+    const btnSair = document.getElementById('btn-sair');
+
+    if (!token) {
+        // Usuário não logado: esconde tudo e mostra apenas "Entrar"
+        document.querySelector('.nav-actions').innerHTML = '<a href="login.html" class="btn-icon">Entrar</a>';
+        return;
+    }
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+
+    // Se for parceiro, esconde o link de Pedidos
+    if (payload.role === 'parceiro') {
+        if (linkPedidos) linkPedidos.style.display = 'none';
+    }
+}
+
+// Chame esta função ao carregar a página
+document.addEventListener('DOMContentLoaded', controlarVisibilidadeNavbar);
+document.addEventListener('DOMContentLoaded', atualizarNavbarPorRole);
 document.addEventListener('DOMContentLoaded', () => {
     carregarCategorias();
-    carregarRestaurantes(); // Inicia sem categoria = busca todos
+    carregarRestaurantes();
     initFilters();
-    checkAuthAndUpdateUI();
     initCategoryScroll();
     carregarEntregadoresDestaque();
+    checkAuthAndUpdateUI();
+    if(document.body.getAttribute('data-page') === 'pedidos') {
+        carregarMeusPedidos();
+    }
 });

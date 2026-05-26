@@ -73,4 +73,12 @@ public class PedidoController {
             return ResponseEntity.internalServerError().build();
         }
     }
+    @GetMapping("/cliente/{cpf}")
+    public ResponseEntity<List<PedidoResponseDTO>> listarPedidosDoCliente(@PathVariable String cpf) {
+        try {
+            return ResponseEntity.ok(pedidoDAO.listarPedidosPorCliente(cpf));
+        } catch (SQLException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

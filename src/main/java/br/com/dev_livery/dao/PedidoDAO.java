@@ -159,4 +159,17 @@ public class PedidoDAO {
         }
         return valorPedido;
     }
+    public List<PedidoResponseDTO> listarPedidosPorCliente(String cpf) throws SQLException {
+        String sql = "SELECT CD_PEDIDO, VALOR_TOTAL, STATUS, DATA, CD_RESTAURANTE, CPF_CLIENTE FROM PEDIDO WHERE CPF_CLIENTE = ?";
+        List<PedidoResponseDTO> pedidos = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, cpf);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    pedidos.add(new PedidoResponseDTO(rs.getInt("CD_PEDIDO"), rs.getDouble("VALOR_TOTAL"), rs.getString("STATUS"), rs.getString("DATA"), rs.getInt("CD_RESTAURANTE"), rs.getString("CPF_CLIENTE")));
+                }
+            }
+        }
+        return pedidos;
+    }
 }

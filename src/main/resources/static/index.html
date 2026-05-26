@@ -32,14 +32,21 @@
             <input type="text" placeholder="Busque por item ou loja">
         </div>
 
-        <div class="nav-actions" id="nav-actions">
-            <a href="login.html" class="btn-icon" aria-label="Entrar" style="text-decoration: none;">
-                <i class="fa-regular fa-user"></i>
-                <span>Entrar</span>
+        <div class="nav-actions">
+            <a href="carrinho.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                <i class="fa-solid fa-basket-shopping" style="color: #ea1d2c;"></i>
+                <span>Carrinho</span>
             </a>
-            <button class="btn-icon cart-btn" aria-label="Carrinho">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span class="cart-badge">0</span>
+            <a href="meus-pedidos.html" class="btn-icon" id="link-pedidos" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <span>Meus Pedidos</span>
+            </a>
+            <a href="perfil.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                <i class="fa-regular fa-circle-user"></i>
+                <span>Perfil</span>
+            </a>
+            <button onclick="logout()" class="btn-icon" id="btn-sair" style="background:none; border:none; color: var(--primary-color); cursor:pointer;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
             </button>
         </div>
     </div>

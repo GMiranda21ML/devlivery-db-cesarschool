@@ -11,10 +11,10 @@
 <body>
     <header class="navbar">
         <div class="container navbar-content">
-            <div class="logo">
+            <a href="index.html" class="logo" style="text-decoration: none; color: inherit;">
                 <i class="fa-solid fa-motorcycle"></i>
                 <h1>Dev-livery</h1>
-            </div>
+            </a>
             <nav class="nav-links" id="nav-actions">
                 <a href="login.html" class="btn-primary" id="login-btn">Entrar</a>
             </nav>
@@ -51,7 +51,10 @@
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let currentRestauranteCd = null;
         let currentRestauranteNome = null;
-
+        function getCartCount() {
+            const carrinhoLocal = JSON.parse(localStorage.getItem('carrinho')) || [];
+            return carrinhoLocal.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+        }
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
             currentRestauranteCd = parseInt(params.get('cdRestaurante'));
@@ -69,7 +72,7 @@
                 const navActions = document.getElementById('nav-actions');
                 if (navActions) {
                     let navContent = '';
-                    
+
                     if (role === 'parceiro') {
                         navContent += `
                             <a href="criar-restaurante.html" class="btn-icon" style="text-decoration: none; color: #1da55a;">
@@ -78,7 +81,7 @@
                             </a>
                         `;
                     }
-                    
+
                     navContent += `
                         <a href="perfil.html" class="btn-icon" style="text-decoration: none;">
                             <i class="fa-solid fa-user"></i>
@@ -89,7 +92,7 @@
                             <span>Sair</span>
                         </button>
                     `;
-                    
+
                     if (role === 'cliente') {
                         navContent += `
                             <button class="btn-icon cart-btn" onclick="openCart()" aria-label="Carrinho">
@@ -98,7 +101,7 @@
                             </button>
                         `;
                     }
-                    
+
                     navActions.innerHTML = navContent;
                 }
             }
@@ -164,40 +167,41 @@
         }
 
         function addToCart(produto) {
-            if (cart.length > 0 && cart[0].cdRestaurante !== produto.cdRestaurante) {
+            // Lemos a chave em português para que o carrinho.html também a encontre!
+            let carrinhoLocal = JSON.parse(localStorage.getItem('carrinho')) || [];
+
+            if (carrinhoLocal.length > 0 && carrinhoLocal[0].cdRestaurante !== produto.cdRestaurante) {
                 if (!confirm('Carrinho tem itens de outro restaurante. Deseja limpar?')) {
                     return;
                 }
-                cart = [];
+                carrinhoLocal = [];
             }
 
-            const existing = cart.find(item => item.cdProduto === produto.cdProduto);
+            const existing = carrinhoLocal.find(item => item.cdProduto === produto.cdProduto);
             if (existing) {
-                existing.quantidade++;
+                existing.quantidade = (existing.quantidade || 1) + 1;
             } else {
-                cart.push({
+                carrinhoLocal.push({
                     ...produto,
                     quantidade: 1
                 });
             }
-            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Salvamos com a chave em português!
+            localStorage.setItem('carrinho', JSON.stringify(carrinhoLocal));
             updateCartBadge();
             alert('Produto adicionado ao carrinho!');
-        }
-
-        function getCartCount() {
-            return cart.reduce((sum, item) => sum + item.quantidade, 0);
         }
 
         function updateCartBadge() {
             const badge = document.querySelector('.cart-badge');
             if (badge) {
-                badge.textContent = getCartCount();
+                const carrinhoLocal = JSON.parse(localStorage.getItem('carrinho')) || [];
+                badge.textContent = carrinhoLocal.reduce((sum, item) => sum + (item.quantidade || 1), 0);
             }
         }
-
         function openCart() {
-            window.location.href = 'checkout.html';
+            window.location.href = 'carrinho.html';
         }
 
         function logout() {
