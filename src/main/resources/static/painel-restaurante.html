@@ -3,386 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Parceiro | DevLivery</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Admin do Restaurante - Dev-livery</title>
+    <link rel="stylesheet" href="../../../../frontnovoAPAGARDEPOIS/styles.css">
     <link rel="stylesheet" href="css/painel.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-
-<nav class="navbar">
-    <div class="nav-brand nav-brand-clickable" onclick="window.location.href='index.html'">
-        <i class="fa-solid fa-burger nav-brand-icon"></i>
-        <span class="nav-brand-text">Dev<span class="nav-brand-highlight">Livery</span> Parceiros</span>
-    </div>
-    <div class="nav-actions" id="nav-actions" style="display: flex; gap: 10px; align-items: center;">
-        <button onclick="window.location.href='index.html'" style="background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
-            <i class="fa-solid fa-arrow-left"></i> Início
-        </button>
-        <button onclick="window.location.href='perfil.html'" style="background: #f1f3f5; border: none; color: #333; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
-            <i class="fa-solid fa-user"></i> Meu Perfil
-        </button>
-        <button onclick="localStorage.removeItem('token'); window.location.href='login.html'" style="background: #fff5f5; border: none; color: #e03131; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
-            <i class="fa-solid fa-right-from-bracket"></i> Sair
-        </button>
-    </div>
-</nav>
-
-<div class="dashboard-container">
-    <div class="header-painel">
-        <div class="header-info">
-            <h1 id="nome-restaurante">Carregando restaurante...</h1>
-            <p>Gerencie seus pedidos e faturamento.</p>
+    <header class="admin-topbar">
+        <div class="container admin-topbar-content">
+            <a href="index.html" class="admin-brand">
+                <i class="fa-solid fa-motorcycle"></i>
+                <span>Dev-livery Admin</span>
+            </a>
+            <div class="admin-topbar-actions">
+                <a href="index.html" class="admin-link-btn"><i class="fa-solid fa-arrow-left"></i> Início</a>
+                <a href="perfil.html" class="admin-link-btn"><i class="fa-solid fa-user"></i> Meu Perfil</a>
+                <a href="#" onclick="logout(); return false;" class="admin-link-btn" style="color: #e03131; border-color: #ffc9c9; background: #fff5f5;"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
+            </div>
         </div>
-        <div class="header-acoes">
-            <button class="btn-procedure" onclick="recalcularNotas()">
-                <i class="fa-solid fa-star"></i> Recalcular Notas (Procedure MySQL)
-            </button>
-        </div>
-    </div>
+    </header>
 
-    <div class="metric-cards">
-        <div class="metric-card metric-faturamento">
-            <h3 class="metric-title"><i class="fa-solid fa-money-bill-trend-up"></i> Faturamento Total</h3>
-            <h2 id="valor-faturamento" class="metric-value faturamento-valor">R$ 0,00</h2>
-            <p class="metric-subtitle">Pedidos concluídos</p>
-        </div>
-        <div class="metric-card metric-pedidos">
-            <h3 class="metric-title"><i class="fa-solid fa-bell"></i> Pedidos na Fila</h3>
-            <h2 id="qtd-pedidos" class="metric-value pedidos-valor">0</h2>
-            <p class="metric-subtitle">Aguardando preparo</p>
-        </div>
-    </div>
+    <main class="container admin-page">
+        <section class="admin-hero">
+            <div>
+                <p class="admin-eyebrow">Painel do restaurante</p>
+                <h1 id="admin-restaurant-name">Carregando restaurante...</h1>
+                <p id="admin-restaurant-description" class="admin-hero-text"></p>
+            </div>
+            <div class="admin-hero-badges">
+                <span class="hero-pill"><i class="fa-solid fa-star"></i> <span id="admin-restaurant-rating">-</span></span>
+                <span class="hero-pill"><i class="fa-solid fa-utensils"></i> <span id="admin-restaurant-category">-</span></span>
+                <span class="hero-pill"><i class="fa-regular fa-clock"></i> <span id="admin-restaurant-time">-</span></span>
+            </div>
+        </section>
 
-    <h2><i class="fa-solid fa-clock"></i> Pedidos Pendentes (Query 2)</h2>
-    <div id="lista-pedidos-pendentes" class="pedidos-grid">
-        <p>Carregando pedidos...</p>
-    </div>
-    <div class="menu-header" style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; margin-bottom: 20px;">
-        <h2><i class="fa-solid fa-utensils"></i> O Meu Cardápio</h2>
-        <button class="btn-primary" onclick="abrirModalProduto()" style="background-color: var(--primary-color); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(234, 29, 44, 0.2);">
-            <i class="fa-solid fa-plus"></i> Novo Produto
-        </button>
-    </div>
+        <section class="admin-metrics-grid" id="admin-metrics"></section>
 
-    <div id="lista-produtos" class="produtos-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
-        <p>A carregar o cardápio...</p>
-    </div>
-
-    <div id="modal-produto" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
-        <div class="modal-content" style="background-color: white; margin: 10% auto; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-            <span class="close" onclick="fecharModalProduto()" style="float: right; font-size: 28px; cursor: pointer; color: #666;">&times;</span>
-            <h2 id="modal-titulo" style="margin-bottom: 20px; color: #333;">Adicionar Produto</h2>
-
-            <form id="form-produto" onsubmit="salvarProduto(event)">
-                <input type="hidden" id="prod-id">
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Nome do Produto</label>
-                    <input type="text" id="prod-nome" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Descrição</label>
-                    <textarea id="prod-desc" required rows="3" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; resize: vertical;"></textarea>
-                </div>
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Preço (R$)</label>
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;"></label>
-                        <input type="number" step="0.01" min="0" id="prod-preco" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+        <section class="admin-layout">
+            <div class="admin-main-column">
+                <section class="admin-card">
+                    <div class="admin-section-header">
+                        <div>
+                            <p class="admin-eyebrow">Produtos</p>
+                            <h2>Gerenciar produtos</h2>
+                        </div>
+                        <button type="button" class="admin-secondary-btn" id="reset-form-btn">Novo produto</button>
                     </div>
-                </div>
-                <button type="submit" style="width: 100%; background-color: #2ecc71; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
-                    <i class="fa-solid fa-check"></i> Guardar Produto
-                </button>
-            </form>
+
+                    <form class="product-form" id="product-form">
+
+                        <input type="hidden" id="editing-product-id">
+                        <div class="product-form-grid">
+                            <div class="field-group">
+                                <label for="product-name">Nome</label>
+                                <input type="text" id="product-name" placeholder="Nome do produto" required>
+                            </div>
+                            <div class="field-group">
+                                <label for="product-price">Preco</label>
+                                <input type="number" id="product-price" min="0" step="0.01" placeholder="0,00" required>
+                            </div>
+                            <div class="field-group full-width">
+                                <label for="product-description">Descricao</label>
+                                <textarea id="product-description" placeholder="Descreva o produto" required></textarea>
+                            </div>
+                            <div class="field-group">
+                                <label for="product-image-url">Imagem por URL</label>
+                                <input type="url" id="product-image-url" placeholder="https://...">
+                            </div>
+                            <div class="field-group full-width">
+                                <label for="product-image-file">Ou enviar imagem</label>
+                                <input type="file" id="product-image-file" accept="image/*">
+                            </div>
+                        </div>
+
+                        <div class="image-preview-box">
+                            <span>Preview</span>
+                            <img id="product-image-preview" src="" alt="Preview do produto" class="hidden-preview">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="product-submit-btn"
+                                    style="background-color: #ea1d2c; color: #ffffff; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;">
+                                Salvar produto
+                            </button>
+                            <button type="button" class="admin-secondary-btn" id="cancel-edit-btn">Cancelar</button>
+                        </div>
+                        <p class="form-feedback" id="product-form-feedback"></p>
+                    </form>
+
+                    <div class="products-admin-grid" id="products-admin-grid"></div>
+                </section>
+
+                <section class="admin-card">
+                    <div class="admin-section-header">
+                        <div>
+                            <p class="admin-eyebrow">Pedidos</p>
+                            <h2>Fila de pedidos e operacao</h2>
+                        </div>
+                    </div>
+                    <div class="orders-admin-list" id="orders-admin-list"></div>
+                </section>
+            </div>
+
+            <aside class="admin-side-column">
+                <section class="admin-card">
+                    <div class="admin-section-header">
+                        <div>
+                            <p class="admin-eyebrow">Faturamento</p>
+                            <h2>Resumo da operacao</h2>
+                        </div>
+                    </div>
+                    <div class="finance-summary" id="finance-summary"></div>
+                </section>
+
+                <section class="admin-card">
+                    <div class="admin-section-header">
+                        <div>
+                            <p class="admin-eyebrow">Atencao</p>
+                            <h2>Status recomendados</h2>
+                        </div>
+                    </div>
+                    <ul class="admin-tips">
+                        <li>Pedidos em <strong>Em preparo</strong> aparecem na fila operacional.</li>
+                        <li>Quando o pedido estiver pronto, use a acao <strong>Enviar para entrega</strong>.</li>
+                        <li>Pedidos que ja sairam ou foram entregues ficam apenas para acompanhamento.</li>
+                    </ul>
+                </section>
+            </aside>
+        </section>
+    </main>
+
+    <div class="confirm-modal hidden-modal" id="delivery-confirm-modal">
+        <div class="confirm-modal-card">
+            <div class="confirm-modal-icon">
+                <i class="fa-solid fa-motorcycle"></i>
+            </div>
+            <h3>Enviar para entrega?</h3>
+            <p>Ao confirmar, o pedido vai sair da fila de preparo e mudar para o status de entrega.</p>
+            <div class="confirm-modal-actions">
+                <button type="button" class="admin-secondary-btn" id="cancel-delivery-btn">Cancelar</button>
+                <button type="button" class="admin-primary-btn" id="confirm-delivery-btn">Confirmar envio</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script src="js/script.js"></script>
-<script>
-    let cdRestauranteLogado = null;
-    const tokenPainel = localStorage.getItem('token');
-
-    async function inicializarPainel() {
-        if (!tokenPainel) {
-            window.location.href = 'login.html';
-            return;
-        }
-
-        const decoded = parseJwt(tokenPainel);
-        if(decoded.role !== 'parceiro') {
-            alert('Acesso negado. Apenas parceiros podem acessar esta página.');
-            window.location.href = 'index.html';
-            return;
-        }
-
-        const cpfParceiro = decoded.sub;
-
-        try {
-            const resRestaurante = await fetch(`/api/restaurantes/${cpfParceiro}`, {
-                headers: { 'Authorization': `Bearer ${tokenPainel}` }
-            });
-
-            if (resRestaurante.ok) {
-                const restaurante = await resRestaurante.json();
-                cdRestauranteLogado = restaurante.cdRestaurante;
-                document.getElementById('nome-restaurante').textContent = `Painel: ${restaurante.nome}`;
-
-                carregarPedidosPendentes();
-                carregarFaturamento();
-            } else {
-                alert('Você ainda não cadastrou um restaurante!');
-                window.location.href = 'criar-restaurante.html';
-            }
-        } catch (error) {
-            console.error("Erro ao carregar o painel:", error);
-        }
-    }
-
-    async function carregarPedidosPendentes() {
-        if(!cdRestauranteLogado) return;
-
-        try {
-            const response = await fetch(`/api/pedidos/restaurante/${cdRestauranteLogado}/pendentes`, {
-                headers: { 'Authorization': `Bearer ${tokenPainel}` }
-            });
-
-            const container = document.getElementById('lista-pedidos-pendentes');
-
-            if (response.ok) {
-                const pedidos = await response.json();
-                document.getElementById('qtd-pedidos').textContent = pedidos.length;
-
-                if (pedidos.length === 0) {
-                    container.innerHTML = '<p class="empty-state">Nenhum pedido pendente no momento.</p>';
-                    return;
-                }
-
-                container.innerHTML = '';
-                pedidos.forEach(pedido => {
-                    container.innerHTML += `
-                        <div class="pedido-card">
-                            <div class="pedido-header">
-                                <strong>Pedido #${pedido.cdPedido}</strong>
-                                <span class="badge-pendente">Pendente</span>
-                            </div>
-                            <p class="pedido-info"><i class="fa-solid fa-user"></i> <strong>Cliente CPF:</strong> ${pedido.cpfCliente}</p>
-                            <p class="pedido-info"><i class="fa-solid fa-calendar"></i> <strong>Data:</strong> ${pedido.data}</p>
-                            <h3 class="pedido-valor-total">R$ ${pedido.valorTotal.toFixed(2).replace('.', ',')}</h3>
-
-                            <button class="btn-acao btn-preparo" onclick="aceitarPedido(${pedido.cdPedido})">
-                                <i class="fa-solid fa-fire-burner"></i> Aceitar e Preparar
-                            </button>
-                        </div>
-                    `;
-                });
-            }
-        } catch (error) {
-            console.error('Erro ao buscar pedidos:', error);
-        }
-    }
-
-    async function carregarFaturamento() {
-        try {
-            const response = await fetch(`/api/pedidos/restaurante/${cdRestauranteLogado}/faturamento`, {
-                headers: { 'Authorization': `Bearer ${tokenPainel}` }
-            });
-            if(response.ok) {
-                const faturamento = await response.json();
-                document.getElementById('valor-faturamento').textContent = `R$ ${faturamento.toFixed(2).replace('.', ',')}`;
-            }
-        } catch (error) {
-            console.error("Erro faturamento:", error);
-        }
-    }
-
-    async function aceitarPedido(cdPedido) {
-        if(!confirm('Deseja mover este pedido para "Em preparo"? O histórico será gravado no banco.')) return;
-
-        try {
-            const response = await fetch(`/api/pedidos/${cdPedido}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${tokenPainel}`
-                },
-                body: JSON.stringify({ status: 'Em preparo' })
-            });
-
-            if (response.ok) {
-                alert('Pedido aceito! Procedure executada com sucesso.');
-                carregarPedidosPendentes();
-            } else {
-                alert('Erro ao atualizar o status do pedido no banco de dados.');
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-        }
-    }
-
-    async function recalcularNotas() {
-        if(!confirm('Deseja recalcular a nota de todos os produtos do seu restaurante usando a Procedure do Banco?')) return;
-
-        try {
-            const response = await fetch(`/api/restaurantes/${cdRestauranteLogado}/recalcular-notas`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${tokenPainel}` }
-            });
-
-            if (response.ok) {
-                alert('Sucesso! As notas dos produtos foram recalculadas no banco pelo Cursor.');
-            } else {
-                alert('Erro ao executar a Procedure no banco.');
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', inicializarPainel);
-    async function carregarProdutos() {
-        if(!cdRestauranteLogado) return;
-
-        try {
-            // Chama o endpoint GET /api/produtos/restaurante/{id} que você criou no Java
-            const response = await fetch(`/api/produtos/restaurante/${cdRestauranteLogado}`, {
-                headers: { 'Authorization': `Bearer ${tokenPainel}` }
-            });
-
-            const container = document.getElementById('lista-produtos');
-
-            if (response.ok) {
-                const produtos = await response.json();
-
-                if (produtos.length === 0) {
-                    container.innerHTML = '<p class="empty-state">O seu cardápio está vazio. Adicione novos produtos!</p>';
-                    return;
-                }
-
-                container.innerHTML = '';
-                produtos.forEach(prod => {
-                    // Design moderno para o card do produto
-                    container.innerHTML += `
-                        <div class="produto-card" style="background: white; border: 1px solid #eee; border-radius: 12px; padding: 20px; position: relative; transition: all 0.3s ease;">
-                            <h3 style="margin-top: 0; color: #333;">${prod.nome}</h3>
-                            <p style="color: #777; font-size: 14px; min-height: 40px;">${prod.descricao}</p>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
-                                <strong style="font-size: 18px; color: var(--primary-color);">R$ ${prod.preco.toFixed(2).replace('.', ',')}</strong>
-                                <span style="background: #fff8e1; color: #f5b041; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;"><i class="fa-solid fa-star"></i> ${prod.nota ? prod.nota.toFixed(1) : '0.0'}</span>
-                            </div>
-                            <div class="acoes-produto" style="display: flex; gap: 10px; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-                                <button onclick="editarProduto(${prod.cdProduto}, '${prod.nome.replace(/'/g, "\\'")}', '${prod.descricao.replace(/'/g, "\\'")}', ${prod.preco})" style="flex: 1; background: #f1f3f5; color: #495057; border: none; padding: 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;">
-                                    <i class="fa-solid fa-pen"></i> Editar
-                                </button>
-                                <button onclick="apagarProduto(${prod.cdProduto})" style="flex: 1; background: #fff5f5; color: #e03131; border: none; padding: 8px; border-radius: 6px; cursor: pointer; transition: background 0.2s;">
-                                    <i class="fa-solid fa-trash"></i> Apagar
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-        } catch (error) {
-            console.error('Erro ao buscar produtos:', error);
-        }
-    }
-
-    // Modal Controle
-    function abrirModalProduto() {
-        document.getElementById('form-produto').reset();
-        document.getElementById('prod-id').value = '';
-        document.getElementById('modal-titulo').textContent = 'Adicionar Novo Produto';
-        document.getElementById('modal-produto').style.display = 'block';
-    }
-
-    function fecharModalProduto() {
-        document.getElementById('modal-produto').style.display = 'none';
-    }
-
-    function editarProduto(id, nome, desc, preco) {
-        document.getElementById('prod-id').value = id;
-        document.getElementById('prod-nome').value = nome;
-        document.getElementById('prod-desc').value = desc;
-        document.getElementById('prod-preco').value = preco;
-        document.getElementById('modal-titulo').textContent = 'Editar Produto';
-        document.getElementById('modal-produto').style.display = 'block';
-    }
-
-    // Criar / Atualizar
-    async function salvarProduto(event) {
-        event.preventDefault();
-
-        // Bloqueio extra contra valores negativos (caso tentem colar um número com -)
-        const precoInput = parseFloat(document.getElementById('prod-preco').value);
-        if (precoInput < 0) {
-            alert('Erro: O preço não pode ser negativo!');
-            return;
-        }
-
-        if (!cdRestauranteLogado) {
-            alert('Erro: O sistema ainda não carregou o seu restaurante. Aguarde um segundo e tente novamente.');
-            return;
-        }
-
-        const id = document.getElementById('prod-id').value;
-        const produtoDTO = {
-            nome: document.getElementById('prod-nome').value,
-            descricao: document.getElementById('prod-desc').value,
-            preco: precoInput,
-            cdRestaurante: cdRestauranteLogado,
-            nota: 0.0 // Forçamos o envio da nota a 0 para que o Java não dê erro ao ler o DTO
-        };
-
-        const isEdicao = id !== '';
-        const url = isEdicao ? `/api/produtos/${id}` : '/api/produtos';
-        const method = isEdicao ? 'PUT' : 'POST';
-
-        try {
-            const response = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${tokenPainel}`
-                },
-                body: JSON.stringify(produtoDTO)
-            });
-
-            if (response.ok) {
-                fecharModalProduto();
-                carregarProdutos(); // Recarrega a lista para mostrar o novo produto
-                alert(isEdicao ? 'Produto atualizado com sucesso!' : 'Produto criado com sucesso!');
-            } else {
-                // Em vez de um erro genérico, vamos extrair a mensagem real enviada pelo Spring Boot!
-                const erroMensagem = await response.text();
-                console.error('Erro da API:', response.status, erroMensagem);
-                alert(`Erro ${response.status} do Servidor: ${erroMensagem}`);
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-            alert('Erro de comunicação com a base de dados. O servidor pode estar desligado.');
-        }
-    }
-
-    // Deletar
-    async function apagarProduto(id) {
-        if(!confirm('Tem a certeza que deseja apagar este produto?')) return;
-
-        try {
-            const response = await fetch(`/api/produtos/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${tokenPainel}` }
-            });
-
-            if (response.ok) {
-                carregarProdutos();
-            } else {
-                alert('Erro ao apagar o produto. Talvez ele já esteja num pedido.');
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-        }
-    }
-</script>
+    <script src="js/painel-restaurante.js"></script>
 </body>
 </html>
