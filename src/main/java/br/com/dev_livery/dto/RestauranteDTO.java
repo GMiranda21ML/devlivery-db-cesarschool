@@ -12,5 +12,7 @@ public record RestauranteDTO(
         String cep,
         String bairro,
         String rua,
-        String cidade
+        String cidade,
+        Integer cdCategoria,
+        Integer tempoEntrega
 ) {}

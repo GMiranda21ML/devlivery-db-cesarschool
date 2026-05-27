@@ -109,10 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('role', role);
 
-                    if (role === 'restaurante') {
+                    if (role === 'parceiro') {
                         window.location.href = 'painel-restaurante.html';
                     } else {
-                        window.location.href = 'index.html';
+                        window.location.href = 'index.html'; // cliente, entregador
                     }
                 } else {
                     alert('Falha no login. Verifique suas credenciais.');

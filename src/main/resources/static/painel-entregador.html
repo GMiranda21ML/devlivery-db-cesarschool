@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Entregador - Dev-livery</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/painel.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<header class="admin-topbar">
+    <div class="container admin-topbar-content">
+        <a href="index.html" class="admin-brand">
+            <i class="fa-solid fa-motorcycle"></i>
+            <span>Dev-livery</span>
+        </a>
+        <div class="admin-topbar-actions">
+            <a href="index.html" class="admin-link-btn"><i class="fa-solid fa-arrow-left"></i> Início</a>
+            <a href="#" onclick="logout(); return false;" class="admin-link-btn admin-link-btn--danger">
+                <i class="fa-solid fa-right-from-bracket"></i> Sair
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="container admin-page">
+    <section class="admin-hero">
+        <div class="admin-hero__cover"></div>
+        <div class="admin-hero__body">
+            <div class="admin-hero__info">
+                <p class="admin-eyebrow"><i class="fa-solid fa-motorcycle"></i> Painel do Entregador</p>
+                <h1 id="entregador-nome">Carregando...</h1>
+                <p class="admin-hero__description">Visualize os pedidos em rota e confirme as entregas realizadas.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="admin-card">
+        <div class="admin-section-header">
+            <div>
+                <p class="admin-eyebrow">Entregas disponíveis</p>
+                <h2>Pedidos em Rota</h2>
+            </div>
+            <button onclick="carregarPedidos()" class="admin-primary-btn">
+                <i class="fa-solid fa-rotate-right"></i> Atualizar
+            </button>
+        </div>
+        <div id="lista-pedidos" style="margin-top: 20px;">
+            <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> Carregando pedidos...</div>
+        </div>
+    </div>
+</main>
+
+<div id="toast" class="toast hidden-toast"></div>
+<script src="js/painel-entregador.js"></script>
+</body>
+</html>

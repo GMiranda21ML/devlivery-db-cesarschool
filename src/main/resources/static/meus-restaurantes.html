@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Restaurantes - Dev-livery</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/painel.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="admin-topbar">
+        <div class="container admin-topbar-content">
+            <a href="index.html" class="admin-brand">
+                <i class="fa-solid fa-motorcycle"></i>
+                <span>Dev-livery</span>
+            </a>
+            <div class="admin-topbar-actions">
+                <a href="index.html" class="admin-link-btn"><i class="fa-solid fa-arrow-left"></i> Início</a>
+                <a href="perfil.html" class="admin-link-btn"><i class="fa-solid fa-user"></i> Meu Perfil</a>
+                <a href="#" onclick="logout(); return false;" class="admin-link-btn" style="color: #e03131; border-color: #ffc9c9; background: #fff5f5;"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container admin-page">
+        <section class="admin-hero">
+            <div class="admin-hero__cover"></div>
+            <div class="admin-hero__body">
+                <div class="admin-hero__info">
+                    <p class="admin-eyebrow"><i class="fa-solid fa-store"></i> Meus Restaurantes</p>
+                    <h1>Meus Estabelecimentos</h1>
+                    <p class="admin-hero__description">Gerencie seus restaurantes, visualize detalhes e crie novos estabelecimentos.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="admin-card" style="margin-top: 30px;">
+            <div class="admin-section-header" style="margin-bottom: 20px;">
+                <div>
+                    <p class="admin-eyebrow">Ações</p>
+                    <h2>Gerenciar Restaurantes</h2>
+                </div>
+                <a href="criar-restaurante.html" class="admin-primary-btn" style="text-decoration: none; display: inline-block;">
+                    <i class="fa-solid fa-plus"></i> Criar Restaurante
+                </a>
+            </div>
+
+            <div id="restaurantes-lista" class="restaurants-grid" style="gap: 20px;">
+            </div>
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>
+    <script src="js/meus-restaurantes.js"></script>
+</body>
+</html>

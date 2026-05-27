@@ -32,11 +32,17 @@
             <input type="text" placeholder="Busque por item ou loja">
         </div>
 
-        <div class="nav-actions">
+        <div class="nav-actions" id="nav-actions">
             <a href="carrinho.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
                 <i class="fa-solid fa-basket-shopping" style="color: #ea1d2c;"></i>
                 <span>Carrinho</span>
             </a>
+
+            <a href="meus-restaurantes.html" class="btn-icon" id="link-meus-restaurantes" style="display: none; text-decoration: none; color: inherit; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                <i class="fa-solid fa-utensils" style="color: #ea1d2c;"></i>
+                <span>Meus Restaurantes</span>
+            </a>
+
             <a href="meus-pedidos.html" class="btn-icon" id="link-pedidos" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
                 <i class="fa-solid fa-bag-shopping"></i>
                 <span>Meus Pedidos</span>
@@ -67,14 +73,18 @@
         <h3>Categorias</h3>
         <div class="categories-wrapper">
             <button class="scroll-btn left-btn" id="scroll-left" aria-label="Rolar para esquerda">
-                <i class="fa-solid fa-chevron-left"></i>
+                <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.5 1.5L1.5 8L8.5 14.5" stroke="#3a3a3a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
             </button>
 
             <div class="categories-grid" id="categories-container">
             </div>
 
             <button class="scroll-btn right-btn" id="scroll-right" aria-label="Rolar para direita">
-                <i class="fa-solid fa-chevron-right"></i>
+                <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1.5 1.5L8.5 8L1.5 14.5" stroke="#3a3a3a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
             </button>
         </div>
     </section>

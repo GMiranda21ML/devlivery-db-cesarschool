@@ -4,207 +4,139 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criar Restaurante - Dev-livery</title>
-    <link rel="stylesheet" href="css/auth.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/criar-restaurante.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card auth-card-large">
-            <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Voltar para Home</a>
-            
-            <div class="logo">
+    <header class="restaurant-create-topbar">
+        <div class="container restaurant-create-topbar-content">
+            <a href="index.html" class="restaurant-create-brand">
                 <i class="fa-solid fa-motorcycle"></i>
-                <h1>Dev-livery</h1>
+                <span>Dev-livery</span>
+            </a>
+            <div class="restaurant-create-actions">
+                <a href="meus-restaurantes.html" class="restaurant-create-link">Meus Restaurantes</a>
+                <a href="index.html" class="restaurant-create-link">Voltar para home</a>
             </div>
+        </div>
+    </header>
 
-            <h2>Cadastrar Restaurante</h2>
-            <p class="subtitle">Preencha os dados do seu restaurante</p>
+    <main class="container restaurant-create-page">
+        <section class="restaurant-create-hero">
+            <div>
+                <p class="restaurant-create-eyebrow">Parceiros</p>
+                <h1>Criar restaurante</h1>
+                <p>Cadastre um novo restaurante com os dados principais do minimundo e a imagem da loja para usar no front do projeto.</p>
+            </div>
+            <div class="restaurant-create-hero-badges">
+                <span><i class="fa-solid fa-store"></i> Cadastro da loja</span>
+                <span><i class="fa-solid fa-image"></i> Imagem do restaurante</span>
+                <span><i class="fa-solid fa-location-dot"></i> Endereco completo</span>
+            </div>
+        </section>
 
-            <form class="auth-form" id="criar-restaurante-form">
-                <div class="form-section">
-                    <h3>Dados do Restaurante</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="cnpj">CNPJ</label>
-                            <input type="text" id="cnpj" placeholder="00.000.000/0000-00" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="cep">CEP</label>
-                            <input type="text" id="cep" placeholder="00000-000" required>
-                        </div>
+        <section class="restaurant-create-layout">
+            <form class="restaurant-create-form-card" id="restaurant-form">
+                <div class="section-title">
+                    <p class="restaurant-create-eyebrow">Formulario</p>
+                    <h2>Dados do restaurante</h2>
+                </div>
 
-                        <div class="form-group">
-                            <label for="nome">Nome</label>
-                            <input type="text" id="nome" placeholder="Nome do restaurante" required>
-                        </div>
+                <div class="restaurant-form-grid">
+                    <div class="field-group">
+                        <label for="restaurant-cnpj">CNPJ</label>
+                        <input type="text" id="restaurant-cnpj" placeholder="00.000.000/0000-00" inputmode="numeric" maxlength="18" required>
+                    </div>
+                    <div class="field-group">
+                        <label for="restaurant-name">Nome</label>
+                        <input type="text" id="restaurant-name" placeholder="Nome do restaurante" required>
+                    </div>
+                    <div class="field-group">
+                        <label for="restaurant-phone">Telefone</label>
+                        <input type="text" id="restaurant-phone" placeholder="(00) 00000-0000" inputmode="numeric" maxlength="15" required>
+                    </div>
 
-                        <div class="form-group">
-                            <label for="telefone_restaurante">Telefone do Restaurante</label>
-                            <input type="text" id="telefone_restaurante" required placeholder="(81) 99999-9999">
-                        </div>
+                    <div class="field-group">
+                        <label for="restaurant-category">Categoria</label>
+                        <select id="restaurant-category" required>
+                            <option value="" disabled selected>Carregando categorias...</option>
+                        </select>
+                    </div>
 
-                        <div class="form-group">
-                            <label for="cidade">Cidade</label>
-                            <input type="text" id="cidade" placeholder="Sua cidade" required>
-                        </div>
+                    <div class="field-group">
+                        <label for="restaurant-delivery-time">Tempo Estimado</label>
+                        <input type="text" id="restaurant-delivery-time" placeholder="Ex: 30-45 min" required>
+                    </div>
 
-                        <div class="form-group">
-                            <label for="rua">Rua</label>
-                            <input type="text" id="rua" placeholder="Nome da rua" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="numero">Número</label>
-                            <input type="text" id="numero" placeholder="Ex: 123" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="bairro">Bairro</label>
-                            <input type="text" id="bairro" placeholder="Seu bairro" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="imagemRestaurante">Logo/Capa do Restaurante (PNG)</label>
-                            <input type="file" id="imagemRestaurante" accept="image/png">
-                        </div>
+                    <div class="field-group">
+                        <label for="restaurant-number">Numero</label>
+                        <input type="text" id="restaurant-number" placeholder="Ex: 120" required>
+                    </div>
+                    <div class="field-group">
+                        <label for="restaurant-cep">CEP</label>
+                        <input type="text" id="restaurant-cep" placeholder="00000-000" required>
+                    </div>
+                    <div class="field-group">
+                        <label for="restaurant-bairro">Bairro</label>
+                        <input type="text" id="restaurant-bairro" placeholder="Seu bairro" required>
+                    </div>
+                    <div class="field-group full-width">
+                        <label for="restaurant-rua">Rua</label>
+                        <input type="text" id="restaurant-rua" placeholder="Nome da rua" required>
+                    </div>
+                    <div class="field-group">
+                        <label for="restaurant-city">Cidade</label>
+                        <input type="text" id="restaurant-city" placeholder="Sua cidade" required>
+                    </div>
+                    <div class="field-group">
+                        <label for="restaurant-image-url">Imagem por URL</label>
+                        <input type="url" id="restaurant-image-url" placeholder="https://...">
+                    </div>
+                    <div class="field-group full-width">
+                        <label for="restaurant-image-file">Ou enviar imagem</label>
+                        <input type="file" id="restaurant-image-file" accept="image/*">
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary btn-block">Criar Restaurante</button>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Criar restaurante</button>
+                    <button type="button" class="btn-secondary" id="reset-restaurant-form">Limpar</button>
+                </div>
+                <p class="form-feedback" id="restaurant-form-feedback"></p>
             </form>
-        </div>
-    </div>
-    
-    <script>
-        const maskCPF = (value) => {
-            return value
-                .replace(/\D/g, '')
-                .replace(/(\d{3})(\d)/, '$1.$2')
-                .replace(/(\d{3})(\d)/, '$1.$2')
-                .replace(/(\d{3})(\d{1,2})/, '$1-$2')
-                .replace(/(-\d{2})\d+?$/, '$1');
-        };
 
-        const maskCNPJ = (value) => {
-            return value
-                .replace(/\D/g, '')
-                .replace(/(\d{2})(\d)/, '$1.$2')
-                .replace(/(\d{3})(\d)/, '$1.$2')
-                .replace(/(\d{3})(\d)/, '$1/$2')
-                .replace(/(\d{4})(\d{1,2})/, '$1-$2')
-                .replace(/(-\d{2})\d+?$/, '$1');
-        };
+            <aside class="restaurant-preview-card">
+                <div class="section-title">
+                    <p class="restaurant-create-eyebrow">Preview</p>
+                    <h2>Como a loja aparece</h2>
+                </div>
 
-        const maskCEP = (value) => {
-            return value
-                .replace(/\D/g, '')
-                .replace(/(\d{5})(\d)/, '$1-$2')
-                .replace(/(-\d{3})\d+?$/, '$1');
-        };
+                <div class="restaurant-preview-cover" id="restaurant-preview-cover">
+                    <img id="restaurant-preview-image" src="" alt="Preview do restaurante" class="hidden-preview">
+                </div>
 
-        const maskPhone = (value) => {
-            return value
-                .replace(/\D/g, '')
-                .replace(/(\d{2})(\d)/, '($1) $2')
-                .replace(/(\d{5})(\d)/, '$1-$2')
-                .replace(/(-\d{4})\d+?$/, '$1');
-        };
+                <div class="restaurant-preview-body">
+                    <h3 id="preview-name">Nome do restaurante</h3>
+                    <p id="preview-address">Rua, numero, bairro e cidade aparecem aqui.</p>
+                    <div class="preview-meta">
+                        <span><i class="fa-solid fa-phone"></i> <span id="preview-phone">Telefone</span></span>
+                        <span><i class="fa-solid fa-building"></i> <span id="preview-cnpj">CNPJ</span></span>
+                    </div>
+                    <div class="preview-note">
+                        Depois de salvar, voce pode abrir o painel admin da loja para gerenciar produtos e pedidos.
+                    </div>
+                    <div class="preview-success-links hidden-links" id="preview-success-links">
+                        <a href="#" id="open-admin-link" class="btn-primary">Abrir painel admin</a>
+                        <a href="index.html" class="btn-secondary link-btn">Ir para home</a>
+                    </div>
+                </div>
+            </aside>
+        </section>
+    </main>
 
-        function parseJwt(token) {
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                return JSON.parse(jsonPayload);
-            } catch (e) {
-                return null;
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const decoded = parseJwt(token);
-            if (!decoded) {
-                localStorage.removeItem('token');
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const inputTelefone = document.getElementById('telefone_restaurante');
-            if (inputTelefone) {
-                inputTelefone.addEventListener('input', (e) => {
-                    e.target.value = maskPhone(e.target.value);
-                });
-            }
-
-            const cnpjInput = document.getElementById('cnpj');
-            if (cnpjInput) cnpjInput.addEventListener('input', (e) => e.target.value = maskCNPJ(e.target.value));
-
-            const cepInput = document.getElementById('cep');
-            if (cepInput) cepInput.addEventListener('input', (e) => e.target.value = maskCEP(e.target.value));
-
-            const form = document.getElementById('criar-restaurante-form');
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const dadosRestaurante = {
-                    cpf: decoded.sub,
-                    nome: document.getElementById('nome').value,
-                    cnpj: document.getElementById('cnpj').value,
-                    telefone: document.getElementById('telefone_restaurante').value,
-                    numero: document.getElementById('numero').value,
-                    cep: document.getElementById('cep').value,
-                    bairro: document.getElementById('bairro').value,
-                    rua: document.getElementById('rua').value,
-                    cidade: document.getElementById('cidade').value
-                };
-
-                try {
-                    const res = await fetch('/api/restaurantes/cadastro', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify(dadosRestaurante)
-                    });
-
-                    if (res.ok) {
-                        const restauranteId = await res.text();
-                        
-                        const fileInput = document.getElementById('imagemRestaurante');
-                        if (fileInput.files.length > 0) {
-                            const formData = new FormData();
-                            formData.append('imagem', fileInput.files[0]);
-                            
-                            await fetch(`/api/restaurantes/${restauranteId}/imagem`, {
-                                method: 'POST',
-                                headers: { 'Authorization': `Bearer ${token}` },
-                                body: formData
-                            });
-                        }
-
-                        alert('Restaurante criado com sucesso!');
-                        window.location.href = 'painel-restaurante.html';
-                    } else {
-                        const errorMsg = await res.text();
-                        alert('Erro: ' + errorMsg);
-                    }
-                } catch (error) {
-                    console.error('Erro:', error);
-                    alert('Erro de conexão com o servidor.');
-                }
-            });
-        });
-    </script>
+    <script src="js/script.js"></script>
+    <script src="js/criar-restaurante.js"></script>
 </body>
 </html>

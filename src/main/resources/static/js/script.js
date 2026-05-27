@@ -336,39 +336,52 @@ function checkAuthAndUpdateUI() {
     const role = decoded.role;
 
     if (navActions) {
-        let navContent = '';
+            let navContent = '';
 
-        if (role === 'parceiro') {
+            if (role === 'parceiro') {
+                navContent += `
+                    <a href="meus-restaurantes.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                        <i class="fa-solid fa-store" style="color: #ea1d2c;"></i>
+                        <span>Meus Restaurantes</span>
+                    </a>
+                `;
+            }
+
+            if (role === 'entregador') {
+                navContent += `
+                    <a href="painel-entregador.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                        <i class="fa-solid fa-motorcycle" style="color: #ea1d2c;"></i>
+                        <span>Entregas</span>
+                    </a>
+                `;
+            }
+
+            if (role === 'cliente' || role === 'parceiro' || role === 'entregador') {
+                navContent += `
+                    <button class="btn-icon cart-btn" onclick="openCart()" aria-label="Carrinho" style="margin-right: 15px; background: none; border: none; cursor: pointer; color: inherit; font-size: 1rem; display: flex; align-items: center; gap: 5px;">
+                        <i class="fa-solid fa-cart-shopping" style="color: #ea1d2c;"></i>
+                        <span>Carrinho</span>
+                        <span class="cart-badge" style="background: #ea1d2c; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.8rem; margin-left: 5px;">${getCartCount()}</span>
+                    </button>
+                `;
+            }
+
             navContent += `
-                <a href="painel-restaurante.html" class="btn-icon" style="text-decoration: none; color: #1da55a;">
-                    <i class="fa-solid fa-store"></i>
-                    <span>Painel Loja</span>
+                <a href="meus-pedidos.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span>Meus Pedidos</span>
                 </a>
-            `;
-        }
-
-        navContent += `
-            <a href="perfil.html" class="btn-icon" style="text-decoration: none;">
-                <i class="fa-solid fa-user"></i>
-                <span>Perfil</span>
-            </a>
-            <button class="btn-icon" onclick="logout()" style="color: var(--primary-color);">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                <span>Sair</span>
-            </button>
-        `;
-
-        if (role === 'cliente') {
-            navContent += `
-                <button class="btn-icon cart-btn" onclick="openCart()" aria-label="Carrinho">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <span class="cart-badge">${getCartCount()}</span>
+                <a href="perfil.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                    <i class="fa-regular fa-circle-user"></i>
+                    <span>Perfil</span>
+                </a>
+                <button class="btn-icon" onclick="logout()" style="background:none; border:none; color: var(--primary-color); cursor:pointer; font-size: 1.2rem;">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 </button>
             `;
-        }
 
-        navActions.innerHTML = navContent;
-    }
+            navActions.innerHTML = navContent;
+        }
 
     if (addressSelector) {
         const addressInfo = addressSelector.querySelector('.address');
@@ -738,12 +751,12 @@ async function calcularCupomBanco() {
     }
 }
 
-// Dispara o carregamento do carrinho na abertura
 document.addEventListener('DOMContentLoaded', () => {
     if(document.body.getAttribute('data-page') === 'carrinho') {
         renderizarTelaCarrinho();
     }
 });
+
 function atualizarNavbarPorRole() {
     const navActions = document.getElementById('nav-actions');
     if (!navActions) return;
@@ -760,13 +773,13 @@ function atualizarNavbarPorRole() {
     }
 
     const payload = JSON.parse(atob(token.split('.')[1]));
-    const role = payload.role; // 'cliente' ou 'parceiro'
+    const role = payload.role;
 
     if (role === 'parceiro') {
         navActions.innerHTML = `
-            <a href="painel-restaurante.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+            <a href="meus-restaurantes.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
                 <i class="fa-solid fa-store" style="color: #ea1d2c;"></i>
-                <span>Meu Painel</span>
+                <span>Restaurantes</span>
             </a>
             <a href="perfil.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500;">
                 <i class="fa-regular fa-circle-user"></i>
@@ -777,56 +790,59 @@ function atualizarNavbarPorRole() {
                 <span>Sair</span>
             </button>
         `;
+    } else if (role === 'entregador') {
+        navActions.innerHTML = `
+            <a href="painel-entregador.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                <i class="fa-solid fa-motorcycle" style="color: #ea1d2c;"></i>
+                <span>Entregas</span>
+            </a>
+            <a href="carrinho.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                <i class="fa-solid fa-basket-shopping" style="color: #ea1d2c;"></i>
+                <span>Carrinho</span>
+            </a>
+            <a href="meus-pedidos.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <span>Meus Pedidos</span>
+            </a>
+            <a href="perfil.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                <i class="fa-regular fa-circle-user"></i>
+                <span>Perfil</span>
+            </a>
+            <button class="btn-icon" onclick="logout()" style="background:none; border:none; cursor:pointer; color: var(--primary-color); display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Sair</span>
+            </button>
+        `;
     } else {
-            navActions.innerHTML = `
-                <a href="carrinho.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
-                    <i class="fa-solid fa-basket-shopping" style="color: #ea1d2c;"></i>
-                    <span>Carrinho</span>
-                </a>
-                <a href="meus-pedidos.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
-                    <i class="fa-solid fa-bag-shopping"></i>
-                    <span>Meus Pedidos</span>
-                </a>
-                <a href="perfil.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
-                    <i class="fa-regular fa-circle-user"></i>
-                    <span>Perfil</span>
-                </a>
-                <button class="btn-icon" onclick="logout()" style="background:none; border:none; cursor:pointer; color: var(--primary-color); display: flex; align-items: center; gap: 8px; font-weight: 500;">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    <span>Sair</span>
-                </button>
-            `;
-        }
-}
-function controlarVisibilidadeNavbar() {
-    const token = localStorage.getItem('token');
-    const linkPedidos = document.getElementById('link-pedidos');
-    const btnSair = document.getElementById('btn-sair');
-
-    if (!token) {
-        // Usuário não logado: esconde tudo e mostra apenas "Entrar"
-        document.querySelector('.nav-actions').innerHTML = '<a href="login.html" class="btn-icon">Entrar</a>';
-        return;
-    }
-
-    const payload = JSON.parse(atob(token.split('.')[1]));
-
-    // Se for parceiro, esconde o link de Pedidos
-    if (payload.role === 'parceiro') {
-        if (linkPedidos) linkPedidos.style.display = 'none';
+        navActions.innerHTML = `
+            <a href="carrinho.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                <i class="fa-solid fa-basket-shopping" style="color: #ea1d2c;"></i>
+                <span>Carrinho</span>
+            </a>
+            <a href="meus-pedidos.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <span>Meus Pedidos</span>
+            </a>
+            <a href="perfil.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: 500; margin-right: 15px;">
+                <i class="fa-regular fa-circle-user"></i>
+                <span>Perfil</span>
+            </a>
+            <button class="btn-icon" onclick="logout()" style="background:none; border:none; cursor:pointer; color: var(--primary-color); display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Sair</span>
+            </button>
+        `;
     }
 }
 
-// Chame esta função ao carregar a página
-document.addEventListener('DOMContentLoaded', controlarVisibilidadeNavbar);
-document.addEventListener('DOMContentLoaded', atualizarNavbarPorRole);
+
 document.addEventListener('DOMContentLoaded', () => {
     carregarCategorias();
     carregarRestaurantes();
     initFilters();
     initCategoryScroll();
     carregarEntregadoresDestaque();
-    checkAuthAndUpdateUI();
+    atualizarNavbarPorRole();
     if(document.body.getAttribute('data-page') === 'pedidos') {
         carregarMeusPedidos();
     }

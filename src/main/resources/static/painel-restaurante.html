@@ -3,151 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin do Restaurante - Dev-livery</title>
+    <title>Painel do Restaurante - Dev-livery</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/painel.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header class="admin-topbar">
-        <div class="container admin-topbar-content">
-            <a href="index.html" class="admin-brand">
-                <i class="fa-solid fa-motorcycle"></i>
-                <span>Dev-livery Admin</span>
-            </a>
-            <div class="admin-topbar-actions">
-                <a href="index.html" class="admin-link-btn"><i class="fa-solid fa-arrow-left"></i> Início</a>
-                <a href="perfil.html" class="admin-link-btn"><i class="fa-solid fa-user"></i> Meu Perfil</a>
-                <a href="#" onclick="logout(); return false;" class="admin-link-btn" style="color: #e03131; border-color: #ffc9c9; background: #fff5f5;"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
-            </div>
-        </div>
-    </header>
 
-    <main class="container admin-page">
-        <section class="admin-hero">
-            <div>
-                <p class="admin-eyebrow">Painel do restaurante</p>
-                <h1 id="admin-restaurant-name">Carregando restaurante...</h1>
-                <p id="admin-restaurant-description" class="admin-hero-text"></p>
-            </div>
-            <div class="admin-hero-badges">
-                <span class="hero-pill"><i class="fa-solid fa-star"></i> <span id="admin-restaurant-rating">-</span></span>
-                <span class="hero-pill"><i class="fa-solid fa-utensils"></i> <span id="admin-restaurant-category">-</span></span>
-                <span class="hero-pill"><i class="fa-regular fa-clock"></i> <span id="admin-restaurant-time">-</span></span>
-            </div>
-        </section>
-
-        <section class="admin-metrics-grid" id="admin-metrics"></section>
-
-        <section class="admin-layout">
-            <div class="admin-main-column">
-                <section class="admin-card">
-                    <div class="admin-section-header">
-                        <div>
-                            <p class="admin-eyebrow">Produtos</p>
-                            <h2>Gerenciar produtos</h2>
-                        </div>
-                        <button type="button" class="admin-secondary-btn" id="reset-form-btn">Novo produto</button>
-                    </div>
-
-                    <form class="product-form" id="product-form">
-
-                        <input type="hidden" id="editing-product-id">
-                        <div class="product-form-grid">
-                            <div class="field-group">
-                                <label for="product-name">Nome</label>
-                                <input type="text" id="product-name" placeholder="Nome do produto" required>
-                            </div>
-                            <div class="field-group">
-                                <label for="product-price">Preco</label>
-                                <input type="number" id="product-price" min="0" step="0.01" placeholder="0,00" required>
-                            </div>
-                            <div class="field-group full-width">
-                                <label for="product-description">Descricao</label>
-                                <textarea id="product-description" placeholder="Descreva o produto" required></textarea>
-                            </div>
-                            <div class="field-group">
-                                <label for="product-image-url">Imagem por URL</label>
-                                <input type="url" id="product-image-url" placeholder="https://...">
-                            </div>
-                            <div class="field-group full-width">
-                                <label for="product-image-file">Ou enviar imagem</label>
-                                <input type="file" id="product-image-file" accept="image/*">
-                            </div>
-                        </div>
-
-                        <div class="image-preview-box">
-                            <span>Preview</span>
-                            <img id="product-image-preview" src="" alt="Preview do produto" class="hidden-preview">
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" id="product-submit-btn"
-                                    style="background-color: #ea1d2c; color: #ffffff; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;">
-                                Salvar produto
-                            </button>
-                            <button type="button" class="admin-secondary-btn" id="cancel-edit-btn">Cancelar</button>
-                        </div>
-                        <p class="form-feedback" id="product-form-feedback"></p>
-                    </form>
-
-                    <div class="products-admin-grid" id="products-admin-grid"></div>
-                </section>
-
-                <section class="admin-card">
-                    <div class="admin-section-header">
-                        <div>
-                            <p class="admin-eyebrow">Pedidos</p>
-                            <h2>Fila de pedidos e operacao</h2>
-                        </div>
-                    </div>
-                    <div class="orders-admin-list" id="orders-admin-list"></div>
-                </section>
-            </div>
-
-            <aside class="admin-side-column">
-                <section class="admin-card">
-                    <div class="admin-section-header">
-                        <div>
-                            <p class="admin-eyebrow">Faturamento</p>
-                            <h2>Resumo da operacao</h2>
-                        </div>
-                    </div>
-                    <div class="finance-summary" id="finance-summary"></div>
-                </section>
-
-                <section class="admin-card">
-                    <div class="admin-section-header">
-                        <div>
-                            <p class="admin-eyebrow">Atencao</p>
-                            <h2>Status recomendados</h2>
-                        </div>
-                    </div>
-                    <ul class="admin-tips">
-                        <li>Pedidos em <strong>Em preparo</strong> aparecem na fila operacional.</li>
-                        <li>Quando o pedido estiver pronto, use a acao <strong>Enviar para entrega</strong>.</li>
-                        <li>Pedidos que ja sairam ou foram entregues ficam apenas para acompanhamento.</li>
-                    </ul>
-                </section>
-            </aside>
-        </section>
-    </main>
-
-    <div class="confirm-modal hidden-modal" id="delivery-confirm-modal">
-        <div class="confirm-modal-card">
-            <div class="confirm-modal-icon">
-                <i class="fa-solid fa-motorcycle"></i>
-            </div>
-            <h3>Enviar para entrega?</h3>
-            <p>Ao confirmar, o pedido vai sair da fila de preparo e mudar para o status de entrega.</p>
-            <div class="confirm-modal-actions">
-                <button type="button" class="admin-secondary-btn" id="cancel-delivery-btn">Cancelar</button>
-                <button type="button" class="admin-primary-btn" id="confirm-delivery-btn">Confirmar envio</button>
-            </div>
+<!-- ===== TOPBAR ===== -->
+<header class="admin-topbar">
+    <div class="container admin-topbar-content">
+        <a href="index.html" class="admin-brand">
+            <i class="fa-solid fa-motorcycle"></i>
+            <span>Dev-livery</span>
+        </a>
+        <div class="admin-topbar-actions">
+            <a href="meus-restaurantes.html" class="admin-link-btn"><i class="fa-solid fa-store"></i> Meus Restaurantes</a>
+            <a href="perfil.html" class="admin-link-btn"><i class="fa-solid fa-user"></i> Perfil</a>
+            <a href="#" onclick="logout(); return false;" class="admin-link-btn admin-link-btn--danger"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
         </div>
     </div>
+</header>
 
-    <script src="js/painel-restaurante.js"></script>
+<main class="container admin-page">
+
+    <!-- ===== HERO HEADER ===== -->
+    <section class="admin-hero" id="admin-hero">
+        <div class="admin-hero__cover" id="admin-hero-cover"></div>
+        <div class="admin-hero__body">
+            <div class="admin-hero__info">
+                <p class="admin-eyebrow"><i class="fa-solid fa-store"></i> Painel do Parceiro</p>
+                <h1 id="admin-restaurant-name">Carregando...</h1>
+                <p id="admin-restaurant-description" class="admin-hero__description"></p>
+                <div class="admin-hero__badges" id="admin-hero-badges">
+                    <span class="hero-pill"><i class="fa-solid fa-star"></i> <span id="admin-restaurant-rating">—</span></span>
+                    <span class="hero-pill"><i class="fa-solid fa-tag"></i> <span id="admin-restaurant-category">—</span></span>
+                    <span class="hero-pill"><i class="fa-regular fa-clock"></i> <span id="admin-restaurant-time">—</span></span>
+                    <span class="hero-pill hero-pill--status hero-pill--open"><i class="fa-solid fa-circle-check"></i> Aberto</span>
+                </div>
+            </div>
+            <div class="admin-hero__actions">
+                <button onclick="abrirModalEdicao()" class="admin-hero__edit-btn">
+                    <i class="fa-solid fa-pen-to-square"></i> Editar loja
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MÉTRICAS ===== -->
+    <section class="admin-metrics-grid" id="admin-metrics"></section>
+
+    <!-- ===== LAYOUT PRINCIPAL ===== -->
+    <section class="admin-layout">
+
+        <!-- COLUNA PRINCIPAL -->
+        <div class="admin-main-column">
+
+            <!-- KANBAN DE PEDIDOS -->
+            <section class="admin-card">
+                <div class="admin-section-header">
+                    <div>
+                        <p class="admin-eyebrow">Operação</p>
+                        <h2>Fila de pedidos</h2>
+                    </div>
+                    <button class="admin-secondary-btn" onclick="carregarTodosPedidos()">
+                        <i class="fa-solid fa-rotate"></i> Atualizar
+                    </button>
+                </div>
+
+                <!-- Abas de status -->
+                <div class="kanban-tabs" id="kanban-tabs">
+                    <button class="kanban-tab active" data-status="Pendente" onclick="mudarAba(this, 'Pendente')">
+                        <i class="fa-solid fa-clock"></i> Pendentes
+                        <span class="tab-badge" id="badge-pendente">0</span>
+                    </button>
+                    <button class="kanban-tab" data-status="Em preparo" onclick="mudarAba(this, 'Em preparo')">
+                        <i class="fa-solid fa-fire-burner"></i> Em preparo
+                        <span class="tab-badge tab-badge--warning" id="badge-preparo">0</span>
+                    </button>
+                    <button class="kanban-tab" data-status="Saiu para entrega" onclick="mudarAba(this, 'Saiu para entrega')">
+                        <i class="fa-solid fa-motorcycle"></i> Saiu para entrega
+                        <span class="tab-badge tab-badge--info" id="badge-entrega">0</span>
+                    </button>
+                </div>
+
+                <!-- Painel Pendentes -->
+                <div class="kanban-panel active" id="panel-Pendente">
+                    <div class="orders-admin-list" id="list-Pendente">
+                        <div class="empty-state"><i class="fa-regular fa-clock"></i> Carregando pedidos...</div>
+                    </div>
+                </div>
+
+                <!-- Painel Em preparo -->
+                <div class="kanban-panel" id="panel-Em preparo">
+                    <div class="orders-admin-list" id="list-Em preparo">
+                        <div class="empty-state"><i class="fa-solid fa-fire-burner"></i> Carregando pedidos...</div>
+                    </div>
+                </div>
+
+                <!-- Painel Saiu para entrega -->
+                <div class="kanban-panel" id="panel-Saiu para entrega">
+                    <div class="orders-admin-list" id="list-Saiu para entrega">
+                        <div class="empty-state"><i class="fa-solid fa-motorcycle"></i> Carregando pedidos...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PRODUTOS -->
+            <section class="admin-card">
+                <div class="admin-section-header">
+                    <div>
+                        <p class="admin-eyebrow">Cardápio</p>
+                        <h2>Gerenciar produtos</h2>
+                    </div>
+                    <button type="button" class="admin-secondary-btn" id="reset-form-btn">
+                        <i class="fa-solid fa-plus"></i> Novo produto
+                    </button>
+                </div>
+
+                <form class="product-form" id="product-form">
+                    <input type="hidden" id="editing-product-id">
+                    <div class="product-form-grid">
+                        <div class="field-group">
+                            <label for="product-name">Nome</label>
+                            <input type="text" id="product-name" placeholder="Nome do produto" required>
+                        </div>
+                        <div class="field-group">
+                            <label for="product-price">Preço (R$)</label>
+                            <input type="number" id="product-price" min="0" step="0.01" placeholder="0,00" required>
+                        </div>
+                        <div class="field-group full-width">
+                            <label for="product-description">Descrição</label>
+                            <textarea id="product-description" placeholder="Descreva o produto" required></textarea>
+                        </div>
+                        <div class="field-group">
+                            <label for="product-image-url">Imagem por URL</label>
+                            <input type="url" id="product-image-url" placeholder="https://...">
+                        </div>
+                        <div class="field-group full-width">
+                            <label for="product-image-file">Ou enviar imagem</label>
+                            <input type="file" id="product-image-file" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="image-preview-box">
+                        <span>Preview</span>
+                        <img id="product-image-preview" src="" alt="Preview do produto" class="hidden-preview">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" id="product-submit-btn" class="admin-primary-btn" style="flex:1;">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar produto
+                        </button>
+                        <button type="button" class="admin-secondary-btn" id="cancel-edit-btn">Cancelar</button>
+                    </div>
+                    <p class="form-feedback" id="product-form-feedback"></p>
+                </form>
+
+                <div class="products-admin-grid" id="products-admin-grid"></div>
+            </section>
+        </div>
+
+        <!-- COLUNA LATERAL -->
+        <aside class="admin-side-column">
+            <section class="admin-card">
+                <div class="admin-section-header">
+                    <div>
+                        <p class="admin-eyebrow">Financeiro</p>
+                        <h2>Resumo</h2>
+                    </div>
+                </div>
+                <div class="finance-summary" id="finance-summary"></div>
+            </section>
+
+            <section class="admin-card">
+                <div class="admin-section-header">
+                    <div>
+                        <p class="admin-eyebrow">Dicas</p>
+                        <h2>Fluxo de status</h2>
+                    </div>
+                </div>
+                <div class="status-flow-guide">
+                    <div class="flow-step">
+                        <span class="flow-dot flow-dot--pending"></span>
+                        <div>
+                            <strong>Pendente</strong>
+                            <p>Pedido recebido, aguardando sua confirmação.</p>
+                        </div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                    <div class="flow-step">
+                        <span class="flow-dot flow-dot--preparing"></span>
+                        <div>
+                            <strong>Em preparo</strong>
+                            <p>Confirme e inicie o preparo do pedido.</p>
+                        </div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+                    <div class="flow-step">
+                        <span class="flow-dot flow-dot--delivery"></span>
+                        <div>
+                            <strong>Saiu para entrega</strong>
+                            <p>Pedido pronto, mande para o entregador.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </section>
+</main>
+
+<!-- ===== MODAL EDITAR RESTAURANTE ===== -->
+<div class="confirm-modal hidden-modal" id="edit-restaurant-modal">
+    <div class="confirm-modal-card edit-modal-card">
+        <h3 class="edit-modal-title">
+            <i class="fa-solid fa-store" style="color: #ea1d2c;"></i> Editar Restaurante
+        </h3>
+        <form id="edit-restaurant-form" class="edit-form">
+            <div class="edit-form-row">
+                <div class="modal-form-group">
+                    <label for="edit-rest-nome">Nome da Loja</label>
+                    <input type="text" id="edit-rest-nome" class="modal-input" placeholder="Ex: Dev Lanches" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="edit-rest-telefone">Telefone</label>
+                    <input type="text" id="edit-rest-telefone" class="modal-input" placeholder="(00) 00000-0000" required>
+                </div>
+            </div>
+            <div class="edit-form-row">
+                <div class="modal-form-group">
+                    <label for="edit-rest-categoria">Categoria</label>
+                    <select id="edit-rest-categoria" class="modal-input" required>
+                        <option value="" disabled selected>Selecione...</option>
+                    </select>
+                </div>
+                <div class="modal-form-group">
+                    <label for="edit-rest-tempo">Tempo de Entrega</label>
+                    <input type="text" id="edit-rest-tempo" class="modal-input" placeholder="Ex: 30-45 min" required>
+                </div>
+            </div>
+            <div class="confirm-modal-actions edit-modal-actions">
+                <button type="button" class="admin-secondary-btn" onclick="fecharModalEdicao()">Cancelar</button>
+                <button type="submit" class="admin-primary-btn">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL CONFIRMAR ENVIO PARA ENTREGA ===== -->
+<div class="confirm-modal hidden-modal" id="delivery-confirm-modal">
+    <div class="confirm-modal-card">
+        <div class="confirm-modal-icon">
+            <i class="fa-solid fa-motorcycle"></i>
+        </div>
+        <h3>Enviar para entrega?</h3>
+        <p>O pedido vai sair da fila de preparo e seu status mudará para <strong>Saiu para entrega</strong>.</p>
+        <div class="confirm-modal-actions">
+            <button type="button" class="admin-secondary-btn" id="cancel-delivery-btn">Cancelar</button>
+            <button type="button" class="admin-primary-btn" id="confirm-delivery-btn">
+                <i class="fa-solid fa-motorcycle"></i> Confirmar envio
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TOAST NOTIFICATION ===== -->
+<div id="toast" class="toast hidden-toast"></div>
+
+<script src="js/painel-restaurante.js"></script>
 </body>
 </html>

@@ -26,8 +26,8 @@ public class SecurityConfigurations {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .csrf(csrf -> csrf.disable()) // Desabilita proteção CSRF (padrão em APIs REST)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // API sem estado (usa JWT)
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
 
                         // 1. RECURSOS PÚBLICOS BÁSICOS (Telas HTML, CSS, JS, Imagens, Swagger)
@@ -43,40 +43,45 @@ public class SecurityConfigurations {
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/favicon.ico").permitAll()
 
-                        // 2. CADASTROS E LOGIN (Tudo Público)
+                        // 2. CADASTROS E LOGIN (Público)
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/clientes/cadastro").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/entregadores/cadastro").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/parceiros/cadastro").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/restaurantes/cadastro").permitAll()
 
-                        // 3. O SEGREDO ESTÁ AQUI: VISUALIZAÇÃO PÚBLICA (Qualquer usuário pode ver lista e menu)
-                        .requestMatchers(HttpMethod.GET, "/api/restaurantes").permitAll() // Vê a lista da página inicial
-                        .requestMatchers(HttpMethod.GET, "/api/restaurantes/**").permitAll() // Vê os detalhes de 1 restaurante
-                        .requestMatchers(HttpMethod.GET, "/api/produtos/restaurante/**").permitAll() // Vê o cardápio
-                        .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/relatorios/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/entregadores/destaques").permitAll()
+                        // 3. VISUALIZAÇÃO PÚBLICA (qualquer um pode ver lista, cardápio e detalhes)
+                        .requestMatchers(HttpMethod.GET,  "/api/restaurantes").permitAll()
+                        .requestMatchers(HttpMethod.GET,  "/api/restaurantes/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,  "/api/produtos/restaurante/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,  "/api/categorias/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,  "/api/relatorios/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,  "/api/entregadores/destaques").permitAll()
                         .requestMatchers("/api/home/**").permitAll()
 
-                        .requestMatchers("/api/restaurantes/**").hasAnyRole("RESTAURANTE", "PARCEIRO")
-                        .requestMatchers("/api/produtos/**").hasAnyRole("RESTAURANTE", "PARCEIRO")
-                        .requestMatchers("/api/pedidos/restaurante/**").hasAnyRole("RESTAURANTE", "PARCEIRO")
+                        // 4. AÇÕES DO PARCEIRO — gerenciar restaurante, produtos e pedidos
+                        .requestMatchers("/api/restaurantes/**").hasRole("PARCEIRO")
+                        .requestMatchers("/api/produtos/**").hasRole("PARCEIRO")
+                        .requestMatchers(HttpMethod.GET,  "/api/pedidos/restaurante/**").hasRole("PARCEIRO")
+                        .requestMatchers(HttpMethod.PUT,  "/api/pedidos/*/status").hasRole("PARCEIRO")
 
-                        // 4. AÇÕES RESTRITAS DE CLIENTE (Precisa estar logado)
+                        // 5. AÇÕES DO CLIENTE — criar pedido, consultar os próprios pedidos
                         .requestMatchers("/api/clientes/**").hasRole("CLIENTE")
-                        .requestMatchers("/api/pedidos/**").hasRole("CLIENTE") // Só o cliente logado faz pedido
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.GET,  "/api/pedidos/cliente/**").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos/simular-desconto").hasRole("CLIENTE")
 
-                        // 5. AÇÕES RESTRITAS DE ENTREGADOR
+                        // 6. AÇÕES DO ENTREGADOR
                         .requestMatchers("/api/entregadores/**").hasRole("ENTREGADOR")
+                        .requestMatchers(HttpMethod.GET, "/api/pedidos/disponiveis-entrega").hasRole("ENTREGADOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/pedidos/*/confirmar-entrega").hasRole("ENTREGADOR")
 
-                        // 6. AÇÕES RESTRITAS DE PARCEIROS E DONOS DE RESTAURANTES
+                        // 7. AÇÕES EXCLUSIVAS DO PARCEIRO (conta/perfil)
                         .requestMatchers("/api/parceiros/**").hasRole("PARCEIRO")
 
-                        // 7. QUALQUER OUTRA ROTA EXIGE ESTAR LOGADO
+                        // 8. QUALQUER OUTRA ROTA EXIGE AUTENTICAÇÃO
                         .anyRequest().authenticated()
                 )
-                // Coloca o nosso filtro de JWT antes do filtro padrão do Spring
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

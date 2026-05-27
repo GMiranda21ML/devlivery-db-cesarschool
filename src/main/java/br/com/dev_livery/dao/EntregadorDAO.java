@@ -163,11 +163,8 @@ public class EntregadorDAO {
                 throw e;
             }
         }
-    }
+    }   public List<EntregadorDestaqueDTO> listarDestaques() throws SQLException {
 
-    public List<EntregadorDestaqueDTO> listarDestaques() throws SQLException {
-
-        // Query EXATAMENTE como está no seu arquivo, sem misturar com a função
         String sqlQuery = """
             SELECT 
                 u.NOME, 
