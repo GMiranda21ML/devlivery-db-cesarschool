@@ -85,7 +85,8 @@ function renderRestaurants(restaurantes) {
 
     restaurantes.forEach((restaurant) => {
         const id = restaurant.cdRestaurante;
-        const bgImage = `/images/rest/rest_${id}.jpg`;
+        const nomeImagemDoBanco = restaurant.nomeImagem;
+        const bgImage = nomeImagemDoBanco ? `/images/rest/${nomeImagemDoBanco}` : 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600&auto=format&fit=crop';
         const nomeSeguro = restaurant.nome || 'Restaurante';
         const sigla = nomeSeguro.substring(0, 2).toUpperCase();
 
@@ -139,12 +140,6 @@ function initFilters() {
                 currentCategory = 'todos';
                 carregarRestaurantes('todos');
             }
-            // =================================================================
-            // INTERAÇÃO PURA COM O BANCO: QUERY 1 (Super Restaurantes)
-            // =================================================================
-            // =================================================================
-                        // INTERAÇÃO PURA COM O BANCO: QUERY 1 (Super Restaurantes)
-                        // =================================================================
                         else if (currentQuickFilter === 'super') {
                             try {
                                 const token = localStorage.getItem('token');
@@ -160,9 +155,7 @@ function initFilters() {
                                 }
                             } catch (e) { console.error("Erro ao buscar Query 1:", e); }
                         }
-                        // =================================================================
-                        // INTERAÇÃO PURA COM O BANCO: QUERY 4 (Produtos Premium)
-                        // =================================================================
+
                         else if (currentQuickFilter === 'premium') {
                             try {
                                 const token = localStorage.getItem('token');

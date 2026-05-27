@@ -112,13 +112,23 @@ public class RestauranteDAO {
         }
     }
 
+    public void atualizarNomeImagem(Long cdRestaurante, String nomeImagem) throws SQLException {
+        String sql = "UPDATE RESTAURANTE SET NOME_IMAGEM = ? WHERE CD_RESTAURANTE = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nomeImagem);
+            ps.setLong(2, cdRestaurante);
+            ps.executeUpdate();
+        }
+    }
+
     public RestauranteResponseDTO buscarPorCpf(String cpfParceiro) throws SQLException {
         String sql = """
                 SELECT
                     R.NOME, U.EMAIL, U.CPF,
                     R.CD_RESTAURANTE, R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
                     R.TELEFONE_RESTAURANTE AS telefoneRestaurante,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
                 FROM USUARIO U
                 INNER JOIN RESTAURANTE R ON U.CPF = R.CPF_PARCEIRO
                 WHERE U.CPF = ?
@@ -142,7 +152,7 @@ public class RestauranteDAO {
                     R.NOME, U.EMAIL, U.CPF,
                     R.CD_RESTAURANTE, R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
                     R.TELEFONE_RESTAURANTE AS telefoneRestaurante,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
                 FROM USUARIO U
                 INNER JOIN RESTAURANTE R ON U.CPF = R.CPF_PARCEIRO
                 WHERE U.CPF = ?
@@ -167,7 +177,7 @@ public class RestauranteDAO {
                     R.NOME, U.EMAIL, U.CPF,
                     R.CD_RESTAURANTE, R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
                     R.TELEFONE_RESTAURANTE AS telefoneRestaurante,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
                 FROM USUARIO U
                 INNER JOIN RESTAURANTE R ON U.CPF = R.CPF_PARCEIRO
                 WHERE R.CD_RESTAURANTE = ?
@@ -191,7 +201,7 @@ public class RestauranteDAO {
                     R.NOME, U.EMAIL, U.CPF,
                     R.CD_RESTAURANTE, R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
                     R.TELEFONE_RESTAURANTE AS telefoneRestaurante,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
                 FROM USUARIO U
                 INNER JOIN RESTAURANTE R ON U.CPF = R.CPF_PARCEIRO
                 """;
@@ -213,14 +223,14 @@ public class RestauranteDAO {
                     R.CD_RESTAURANTE, U.CPF, R.NOME, U.EMAIL,
                     R.TELEFONE_RESTAURANTE AS telefoneRestaurante,
                     R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
                 FROM USUARIO U
                 INNER JOIN RESTAURANTE R ON U.CPF = R.CPF_PARCEIRO
                 INNER JOIN PRODUTO P ON R.CD_RESTAURANTE = P.CD_RESTAURANTE
                 GROUP BY
                     R.CD_RESTAURANTE, U.CPF, R.NOME, U.EMAIL,
                     R.TELEFONE_RESTAURANTE, R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
                 HAVING AVG(P.NOTA) > 4.0
                 """;
         List<RestauranteResponseDTO> restaurantes = new ArrayList<>();
@@ -253,7 +263,9 @@ public class RestauranteDAO {
                 rs.getString("CIDADE"),
                 nota,
                 taxa,
-                tempo
+                tempo,
+                rs.getString("NOME_IMAGEM")
+
         );
     }
 
@@ -263,7 +275,7 @@ public class RestauranteDAO {
                     R.NOME, U.EMAIL, U.CPF,
                     R.CD_RESTAURANTE, R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
                     R.TELEFONE_RESTAURANTE AS telefoneRestaurante,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
                 FROM USUARIO U
                 INNER JOIN RESTAURANTE R ON U.CPF = R.CPF_PARCEIRO
                 INNER JOIN PERTENCE P ON R.CD_RESTAURANTE = P.CD_RESTAURANTE

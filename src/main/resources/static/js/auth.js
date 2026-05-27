@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('role', role);
 
                     if (role === 'parceiro') {
-                        window.location.href = 'painel-restaurante.html';
+                        window.location.href = 'meus-restaurantes.html';
                     } else {
                         window.location.href = 'index.html'; // cliente, entregador
                     }

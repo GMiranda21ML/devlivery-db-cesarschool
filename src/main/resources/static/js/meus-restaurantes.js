@@ -42,7 +42,8 @@ async function carregarRestaurantesParceiro() {
             container.innerHTML = '';
             restaurantes.forEach(restaurant => {
                 const id = restaurant.cdRestaurante;
-                const bgImage = `/images/rest/rest_${id}.jpg`;
+                const nomeImagemDoBanco = restaurant.nomeImagem;
+                const bgImage = nomeImagemDoBanco ? `/images/rest/${nomeImagemDoBanco}` : 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600&auto=format&fit=crop';
                 const nomeSeguro = restaurant.nome || 'Restaurante';
                 const sigla = nomeSeguro.substring(0, 2).toUpperCase();
 

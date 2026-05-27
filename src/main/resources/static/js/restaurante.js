@@ -99,24 +99,25 @@ let currentRestauranteCd = null;
         updateCartUI();
     });
 
-    // --- HERO ---
+// --- HERO ---
 function preencherHero(r) {
     document.getElementById('restaurante-nome').textContent = r.nome;
     document.getElementById('rest-tempo').textContent = r.tempoEntrega ? `${r.tempoEntrega} min` : '—';
     document.getElementById('rest-nota').textContent = r.nota ? r.nota.toFixed(1) : '—';
 
-    // Foto no fundo (cover)
     const cover = document.getElementById('rest-cover');
-    cover.style.backgroundImage = `url('/images/rest/rest_${r.cdRestaurante}.jpg')`;
+    const nomeImagemDoBanco = r.nomeImagem;
+    const bgImage = nomeImagemDoBanco ? `/images/rest/${nomeImagemDoBanco}` : 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600&auto=format&fit=crop';
+
+    cover.style.backgroundImage = `url('${bgImage}')`;
     cover.style.backgroundSize = 'cover';
     cover.style.backgroundPosition = 'center';
 
-    // Foto no avatar
     const avatar = document.getElementById('rest-avatar');
-    avatar.innerHTML = `<img src="/images/rest/rest_${r.cdRestaurante}.jpg"
+    avatar.innerHTML = `<img src="${bgImage}"
         alt="${r.nome}"
         style="width:100%;height:100%;object-fit:cover;border-radius:15px;"
-        onerror="this.parentElement.innerHTML='<i class=\'fa-solid fa-store\'></i>'"
+        onerror="this.parentElement.innerHTML='<i class=\\'fa-solid fa-store\\'></i>'"
     >`;
 
     const meta = document.getElementById('rest-meta');
@@ -139,20 +140,19 @@ function preencherHero(r) {
         </span>
     `;
 
-        // Botão de ir para painel se for parceiro e dono
-        const token = localStorage.getItem('token');
-        if (token) {
-            const decoded = parseJwt(token);
-            if (decoded?.role === 'parceiro') {
-                const actionsEl = document.getElementById('rest-actions');
-                actionsEl.innerHTML = `
-                    <a href="painel-restaurante.html" class="rest-hero__btn rest-hero__btn--ghost">
-                        <i class="fa-solid fa-chart-line"></i> Painel Admin
-                    </a>
-                `;
-            }
+    const token = localStorage.getItem('token');
+    if (token) {
+        const decoded = parseJwt(token);
+        if (decoded?.role === 'parceiro') {
+            const actionsEl = document.getElementById('rest-actions');
+            actionsEl.innerHTML = `
+                <a href="painel-restaurante.html" class="rest-hero__btn rest-hero__btn--ghost">
+                    <i class="fa-solid fa-chart-line"></i> Painel Admin
+                </a>
+            `;
         }
     }
+}
 
     // --- RENDER PRODUTOS ---
     function renderProdutos(produtos) {

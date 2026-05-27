@@ -34,11 +34,18 @@ public class RestauranteController {
     @PostMapping("/{id}/imagem")
     public ResponseEntity<String> uploadImagemRestaurante(@PathVariable Long id, @RequestParam("imagem") MultipartFile imagem) {
         try {
-            Path caminho = Paths.get("src/main/resources/static/images/rest/rest_" + id + ".jpg");
+            String nomeOriginal = imagem.getOriginalFilename();
+
+            String nomeFinalDoArquivo = "rest_" + id + "_" + nomeOriginal.replaceAll("\\s+", "_");
+
+            Path caminho = Paths.get("src/main/resources/static/images/rest/" + nomeFinalDoArquivo);
             Files.copy(imagem.getInputStream(), caminho, StandardCopyOption.REPLACE_EXISTING);
-            return ResponseEntity.ok("Imagem salva!");
+
+            restauranteDAO.atualizarNomeImagem(id, nomeFinalDoArquivo);
+
+            return ResponseEntity.ok("Imagem salva com sucesso e registrada no banco!");
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Erro ao salvar a imagem");
+            return ResponseEntity.internalServerError().body("Erro ao salvar a imagem: " + e.getMessage());
         }
     }
 
