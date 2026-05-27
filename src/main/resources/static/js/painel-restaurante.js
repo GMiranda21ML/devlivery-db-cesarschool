@@ -417,11 +417,14 @@ async function carregarProdutos() {
                 return;
             }
 
-            const imagemPadrao = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
 
-            container.innerHTML = produtos.map(prod => `
+            container.innerHTML = produtos.map(prod => {
+                const nomeImagem = prod.nomeImagem;
+                const imgSrc = nomeImagem ? `/images/prod/${nomeImagem}` : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
+
+                return `
                 <article class="product-admin-card">
-                    <img src="${imagemPadrao}" alt="${prod.nome}">
+                    <img src="${imgSrc}" alt="${prod.nome}">
                     <div class="product-admin-body">
                         <div class="product-admin-title-row">
                             <h3>${prod.nome}</h3>
@@ -441,7 +444,7 @@ async function carregarProdutos() {
                         </div>
                     </div>
                 </article>
-            `).join('');
+            `;}).join('');
         }
     } catch (error) {
         console.error('Erro ao buscar produtos:', error);
@@ -508,6 +511,20 @@ async function handleFormSubmit(event) {
         });
 
         if (response.ok) {
+            const produtoId = isEdicao ? id : await response.text();
+
+            const imagemFile = document.getElementById('product-image-file').files[0];
+            if (imagemFile) {
+                const formData = new FormData();
+                formData.append('imagem', imagemFile);
+
+                await fetch(`/api/produtos/${produtoId}/imagem`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${tokenPainel}` },
+                    body: formData
+                });
+            }
+
             resetProductForm();
             await carregarProdutos();
             feedback.textContent = isEdicao ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso!';
@@ -595,39 +612,86 @@ document.getElementById('edit-restaurant-form')?.addEventListener('submit', asyn
     const tempo = document.getElementById('edit-rest-tempo').value.trim();
     const categoria = document.getElementById('edit-rest-categoria').value;
 
+    // Captura o arquivo de imagem
+    const imagemFile = document.getElementById('edit-rest-imagem').files[0];
+
     if (nome) dados.nome = nome;
     if (telefone) dados.telefoneRestaurante = telefone;
     if (tempo) dados.tempoEntrega = parseInt(tempo);
     if (categoria) dados.cdCategoria = parseInt(categoria);
 
-    if (Object.keys(dados).length === 0) {
-        showToast('Preencha ao menos um campo para atualizar.', 'error');
+    if (Object.keys(dados).length === 0 && !imagemFile) {
+        showToast('Preencha ao menos um campo ou envie uma foto para atualizar.', 'error');
         return;
     }
 
     try {
-        const response = await fetch(`/api/restaurantes/${cdRestauranteLogado}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${tokenPainel}`
-            },
-            body: JSON.stringify(dados)
-        });
-
-        if (response.ok) {
-            showToast('Restaurante atualizado com sucesso!', 'success');
-            fecharModalEdicao();
-            setTimeout(() => location.reload(), 1000);
-        } else {
-            const msg = await response.text();
-            showToast('Erro ao atualizar: ' + msg, 'error');
+        // 1. Atualiza os dados de texto, se houver alteração
+        if (Object.keys(dados).length > 0) {
+            const responseText = await fetch(`/api/restaurantes/${cdRestauranteLogado}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tokenPainel}`
+                },
+                body: JSON.stringify(dados)
+            });
+            if (!responseText.ok) {
+                const msg = await responseText.text();
+                showToast('Erro ao atualizar dados: ' + msg, 'error');
+                return;
+            }
         }
+
+        // 2. Faz o upload da nova imagem se o usuário escolheu um arquivo
+        if (imagemFile) {
+            const formData = new FormData();
+            formData.append('imagem', imagemFile);
+            const responseImg = await fetch(`/api/restaurantes/${cdRestauranteLogado}/imagem`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tokenPainel}` },
+                body: formData
+            });
+            if (!responseImg.ok) {
+                showToast('Erro ao atualizar a foto de capa.', 'error');
+                return;
+            }
+        }
+
+        showToast('Restaurante atualizado com sucesso!', 'success');
+        fecharModalEdicao();
+
+        // Recarrega a página forçando limpeza do cache após um segundo para a nova imagem carregar
+        setTimeout(() => location.reload(true), 1000);
+
     } catch (error) {
         console.error('Erro ao editar restaurante:', error);
         showToast('Erro de conexão com o servidor.', 'error');
     }
 });
+
+// Adicione esta nova função em qualquer lugar no final do arquivo:
+async function apagarRestaurante() {
+    if (!confirm("Tem certeza absoluta? O restaurante será apagado do sistema se não houver pedidos no histórico.")) return;
+
+    try {
+        const res = await fetch(`/api/restaurantes/${cdRestauranteLogado}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${tokenPainel}` }
+        });
+
+        if (res.ok) {
+            alert("Restaurante excluído com sucesso.");
+            window.location.href = "meus-restaurantes.html";
+        } else {
+            const msg = await res.text();
+            showToast(msg, 'error'); // Mostra a mensagem gerada pela proteção do Banco de Dados
+            fecharModalEdicao();
+        }
+    } catch (error) {
+        showToast("Erro ao tentar excluir.", 'error');
+    }
+}
 
 function bindFormEvents() {
     document.getElementById('product-form').addEventListener('submit', handleFormSubmit);

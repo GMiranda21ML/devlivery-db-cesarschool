@@ -308,4 +308,35 @@ public class RestauranteDAO {
             stmt.execute();
         }
     }
+
+    public void excluir(Integer cdRestaurante) throws SQLException {
+        String sqlPertence = "DELETE FROM PERTENCE WHERE CD_RESTAURANTE = ?";
+        String sqlProduto = "DELETE FROM PRODUTO WHERE CD_RESTAURANTE = ?";
+        String sqlRestaurante = "DELETE FROM RESTAURANTE WHERE CD_RESTAURANTE = ?";
+
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false); // Inicia uma transação segura
+            try {
+                try (PreparedStatement ps = conn.prepareStatement(sqlPertence)) {
+                    ps.setInt(1, cdRestaurante);
+                    ps.executeUpdate();
+                }
+
+                try (PreparedStatement ps = conn.prepareStatement(sqlProduto)) {
+                    ps.setInt(1, cdRestaurante);
+                    ps.executeUpdate();
+                }
+
+                try (PreparedStatement ps = conn.prepareStatement(sqlRestaurante)) {
+                    ps.setInt(1, cdRestaurante);
+                    ps.executeUpdate();
+                }
+
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e; // Lança o erro para o Controller avisar o usuário
+            }
+        }
+    }
 }

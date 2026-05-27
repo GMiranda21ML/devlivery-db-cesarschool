@@ -177,7 +177,8 @@ function preencherHero(r) {
 
         container.innerHTML = '';
         produtos.forEach(produto => {
-            const imagemSrc = `/images/prod/prod_${produto.cdProduto}.jpg`;
+            const nomeImagemDoBanco = produto.nomeImagem;
+            const imagemSrc = nomeImagemDoBanco ? `/images/prod/${nomeImagemDoBanco}` : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop';
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `

@@ -72,29 +72,29 @@ public class RelatorioDAO {
         return lista;
     }
 
-    public List<String> listarSuperRestaurantes() throws SQLException {
+    public List<Integer> listarSuperRestaurantes() throws SQLException {
         String sql = """
-        SELECT 
-            r.NOME
-        FROM 
-            RESTAURANTE r 
-        JOIN 
-            PRODUTO p ON r.CD_RESTAURANTE = p.CD_RESTAURANTE 
-        GROUP BY 
-            r.NOME 
-        HAVING 
+        SELECT
+            r.CD_RESTAURANTE
+        FROM
+            RESTAURANTE r
+        JOIN
+            PRODUTO p ON r.CD_RESTAURANTE = p.CD_RESTAURANTE
+        GROUP BY
+            r.CD_RESTAURANTE
+        HAVING
             AVG(p.NOTA) > 4.0
     """;
 
-        List<String> nomes = new ArrayList<>();
+        List<Integer> ids = new ArrayList<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                nomes.add(rs.getString("NOME"));
+                ids.add(rs.getInt("CD_RESTAURANTE"));
             }
         }
-        return nomes;
+        return ids;
     }
 
     // NOVO: Executa a Consulta 4 (Produtos Premium - SUBCONSULTA)
@@ -102,7 +102,8 @@ public class RelatorioDAO {
         String sql = """
             SELECT 
                 NOME, 
-                PRECO
+                PRECO,
+                CD_RESTAURANTE
             FROM 
                 PRODUTO
             WHERE 
@@ -116,7 +117,8 @@ public class RelatorioDAO {
             while (rs.next()) {
                 produtos.add(new ProdutoPremiumDTO(
                         rs.getString("NOME"),
-                        rs.getDouble("PRECO")
+                        rs.getDouble("PRECO"),
+                        rs.getInt("CD_RESTAURANTE")
                 ));
             }
         }

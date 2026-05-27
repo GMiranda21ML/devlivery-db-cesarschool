@@ -131,4 +131,14 @@ public class RestauranteController {
             return ResponseEntity.internalServerError().body("Erro: " + e.getMessage());
         }
     }
+
+    @DeleteMapping("/{cdRestaurante}")
+    public ResponseEntity<String> excluir(@PathVariable Integer cdRestaurante) {
+        try {
+            restauranteDAO.excluir(cdRestaurante);
+            return ResponseEntity.ok("Restaurante excluído com sucesso.");
+        } catch (SQLException e) {
+            return ResponseEntity.badRequest().body("Não é possível excluir o restaurante. Verifique se existem pedidos no histórico vinculados a ele.");
+        }
+    }
 }

@@ -23,7 +23,7 @@ public class ProdutoDAO {
 
     public List<ProdutoResponseDTO> listarPorRestaurante(Integer cdRestaurante) throws SQLException {
         String sql = """
-                SELECT CD_PRODUTO, NOME, DESCRICAO, NOTA, PRECO, CD_RESTAURANTE
+                SELECT CD_PRODUTO, NOME, DESCRICAO, NOTA, PRECO, CD_RESTAURANTE, NOME_IMAGEM
                 FROM PRODUTO
                 WHERE CD_RESTAURANTE = ?;
                 """;
@@ -40,7 +40,8 @@ public class ProdutoDAO {
                             rs.getString("DESCRICAO"),
                             rs.getDouble("NOTA"),
                             rs.getDouble("PRECO"),
-                            rs.getInt("CD_RESTAURANTE")
+                            rs.getInt("CD_RESTAURANTE"),
+                            rs.getString("NOME_IMAGEM")
                     ));
                 }
             }
@@ -50,7 +51,7 @@ public class ProdutoDAO {
 
     public ProdutoResponseDTO buscarPorId(Integer cdProduto) throws SQLException {
         String sql = """
-                SELECT CD_PRODUTO, NOME, DESCRICAO, NOTA, PRECO, CD_RESTAURANTE
+                SELECT CD_PRODUTO, NOME, DESCRICAO, NOTA, PRECO, CD_RESTAURANTE, NOME_IMAGEM
                 FROM PRODUTO
                 WHERE CD_PRODUTO = ?;
                 """;
@@ -65,7 +66,8 @@ public class ProdutoDAO {
                             rs.getString("DESCRICAO"),
                             rs.getDouble("NOTA"),
                             rs.getDouble("PRECO"),
-                            rs.getInt("CD_RESTAURANTE")
+                            rs.getInt("CD_RESTAURANTE"),
+                            rs.getString("NOME_IMAGEM")
                     );
                 }
             }
@@ -73,17 +75,25 @@ public class ProdutoDAO {
         return null;
     }
 
-    public void inserir(ProdutoDTO produto) throws SQLException {
+    public Integer inserir(ProdutoDTO produto) throws SQLException {
         String sql = "INSERT INTO PRODUTO (NOME, DESCRICAO, NOTA, PRECO, CD_RESTAURANTE) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+
             stmt.setString(1, produto.nome());
             stmt.setString(2, produto.descricao());
             stmt.setDouble(3, produto.nota() != null ? produto.nota() : 0.0);
             stmt.setDouble(4, produto.preco());
             stmt.setInt(5, produto.cdRestaurante());
             stmt.executeUpdate();
+
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
         }
+        return null;
     }
 
     public void atualizar(Integer cdProduto, ProdutoDTO produto) throws SQLException {
@@ -96,6 +106,16 @@ public class ProdutoDAO {
             stmt.setDouble(4, produto.preco());
             stmt.setInt(5, cdProduto);
             stmt.executeUpdate();
+        }
+    }
+
+    public void atualizarNomeImagem(Integer cdProduto, String nomeImagem) throws SQLException {
+        String sql = "UPDATE PRODUTO SET NOME_IMAGEM = ? WHERE CD_PRODUTO = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nomeImagem);
+            ps.setInt(2, cdProduto);
+            ps.executeUpdate();
         }
     }
 

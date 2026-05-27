@@ -531,6 +531,7 @@ footer {
     color: #333;
 }
 
+
 /* Inputs e Selects */
 .modal-input {
     width: 100%;
@@ -606,4 +607,44 @@ select.modal-input {
     background-color: #fff;
 }
 
+/* ========================================= */
+/* MODAL POP-UP (SOBREPOSIÇÃO)               */
+/* ========================================= */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6); /* Fundo escuro semi-transparente */
+    z-index: 1000; /* Garante que fique acima de tudo (navbar, etc) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(3px); /* Efeito moderno de desfoque no fundo */
+}
+
+.modal-content {
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    position: relative;
+    animation: modalFadeIn 0.3s ease; /* Animação suave ao abrir */
+}
+
+/* Animação para o modal surgir de baixo para cima levemente */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 

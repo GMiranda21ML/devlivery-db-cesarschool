@@ -2,5 +2,6 @@ package br.com.dev_livery.dto;
 
 public record ProdutoPremiumDTO(
         String nome,
-        Double preco
+        Double preco,
+        Integer cdRestaurante
 ) {}

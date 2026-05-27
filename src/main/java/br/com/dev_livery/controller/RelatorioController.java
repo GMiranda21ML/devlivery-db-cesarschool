@@ -52,7 +52,7 @@ public class RelatorioController {
     }
 
     @GetMapping("/super-restaurantes")
-    public ResponseEntity<List<String>> getSuperRestaurantes() {
+    public ResponseEntity<List<Integer>> getSuperRestaurantes() {
         try {
             return ResponseEntity.ok(relatorioDAO.listarSuperRestaurantes());
         } catch (SQLException e) {

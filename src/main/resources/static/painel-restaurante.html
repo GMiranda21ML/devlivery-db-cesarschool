@@ -241,9 +241,22 @@
                     <input type="text" id="edit-rest-tempo" class="modal-input" placeholder="Ex: 30-45 min" required>
                 </div>
             </div>
-            <div class="confirm-modal-actions edit-modal-actions">
-                <button type="button" class="admin-secondary-btn" onclick="fecharModalEdicao()">Cancelar</button>
-                <button type="submit" class="admin-primary-btn">Salvar Alterações</button>
+
+            <div class="edit-form-row" style="grid-column: 1 / -1; margin-bottom: 20px;">
+                <div class="modal-form-group">
+                    <label for="edit-rest-imagem">Nova Foto de Capa (Opcional)</label>
+                    <input type="file" id="edit-rest-imagem" class="modal-input" accept="image/*">
+                </div>
+            </div>
+
+            <div class="confirm-modal-actions edit-modal-actions" style="justify-content: space-between;">
+                <button type="button" class="admin-link-btn admin-link-btn--danger" onclick="apagarRestaurante()" style="padding: 0; display: flex; gap: 8px; align-items: center; border: none; background: transparent; cursor: pointer; font-weight: 600;">
+                    <i class="fa-solid fa-trash"></i> Excluir Restaurante
+                </button>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="admin-secondary-btn" onclick="fecharModalEdicao()">Cancelar</button>
+                    <button type="submit" class="admin-primary-btn">Salvar Alterações</button>
+                </div>
             </div>
         </form>
     </div>

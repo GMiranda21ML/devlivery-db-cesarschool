@@ -142,20 +142,15 @@ function initFilters() {
             }
                         else if (currentQuickFilter === 'super') {
                             try {
-                                const token = localStorage.getItem('token');
-                                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-
-                                const res = await fetch('/api/relatorios/super-restaurantes', { headers });
+                                const res = await fetch('/api/relatorios/super-restaurantes');
                                 if (res.ok) {
-                                    const nomesSuper = await res.json();
-                                    const filtrados = listaRestaurantesOriginal.filter(r => nomesSuper.includes(r.nome));
+                                    const idsSuper = await res.json();
+                                    // Compara exatamente pelo ID do restaurante!
+                                    const filtrados = listaRestaurantesOriginal.filter(r => idsSuper.includes(r.cdRestaurante));
                                     renderRestaurants(filtrados);
-                                } else {
-                                    console.error("Bloqueado pelo Spring Security (403)");
                                 }
                             } catch (e) { console.error("Erro ao buscar Query 1:", e); }
                         }
-
                         else if (currentQuickFilter === 'premium') {
                             try {
                                 const token = localStorage.getItem('token');
@@ -233,6 +228,9 @@ function renderProdutosPremium(produtos) {
         card.style.padding = '20px';
         card.style.gap = '15px';
 
+        card.style.cursor = 'pointer';
+        card.onclick = () => window.location.href = `restaurante.html?cdRestaurante=${prod.cdRestaurante}`;
+
         card.innerHTML = `
             <div style="width: 50px; height: 50px; background: #e8f8f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #2ecc71; font-size: 20px;">
                 <i class="fa-solid fa-crown"></i>
@@ -243,6 +241,7 @@ function renderProdutosPremium(produtos) {
                     R$ ${prod.preco.toFixed(2).replace('.', ',')}
                 </span>
             </div>
+            <i class="fa-solid fa-chevron-right" style="color: #ccc;"></i>
         `;
         container.appendChild(card);
     });

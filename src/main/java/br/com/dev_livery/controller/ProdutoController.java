@@ -6,6 +6,12 @@ import br.com.dev_livery.dto.ProdutoResponseDTO;
 import br.com.dev_livery.dto.ProdutoDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -46,8 +52,8 @@ public class ProdutoController {
     @PostMapping
     public ResponseEntity<String> inserir(@RequestBody ProdutoDTO produto) {
         try {
-            produtoDAO.inserir(produto);
-            return ResponseEntity.ok("Produto criado com sucesso!");
+            Integer idGerado = produtoDAO.inserir(produto);
+            return ResponseEntity.ok(idGerado.toString());
         } catch (SQLException e) {
             return ResponseEntity.internalServerError().body("Erro no banco: " + e.getMessage());
         }
@@ -70,6 +76,24 @@ public class ProdutoController {
             return ResponseEntity.ok("Produto deletado com sucesso!");
         } catch (SQLException e) {
             return ResponseEntity.internalServerError().body("Erro no banco: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/imagem")
+    public ResponseEntity<String> uploadImagemProduto(@PathVariable Integer id, @RequestParam("imagem") MultipartFile imagem) {
+        try {
+            String nomeOriginal = imagem.getOriginalFilename();
+            String nomeFinalDoArquivo = "prod_" + id + "_" + nomeOriginal.replaceAll("\\s+", "_");
+
+            Path caminho = Paths.get("src/main/resources/static/images/prod/" + nomeFinalDoArquivo);
+            Files.createDirectories(caminho.getParent()); // Garante que a pasta 'prod' exista
+            Files.copy(imagem.getInputStream(), caminho, StandardCopyOption.REPLACE_EXISTING);
+
+            produtoDAO.atualizarNomeImagem(id, nomeFinalDoArquivo);
+
+            return ResponseEntity.ok("Imagem do produto salva com sucesso!");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Erro ao salvar imagem: " + e.getMessage());
         }
     }
 }
