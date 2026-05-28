@@ -24,9 +24,10 @@ public class RelatorioController {
     }
 
     @GetMapping("/faturamento")
-    public ResponseEntity<List<FaturamentoDTO>> getFaturamento() {
+    public ResponseEntity<List<FaturamentoDTO>> getFaturamento(
+            @RequestParam(required = false) Integer cdRestaurante) {
         try {
-            return ResponseEntity.ok(relatorioDAO.listarFaturamento());
+            return ResponseEntity.ok(relatorioDAO.listarFaturamento(cdRestaurante));
         } catch (SQLException e) {
             return ResponseEntity.internalServerError().build();
         }

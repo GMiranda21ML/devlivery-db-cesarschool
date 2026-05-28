@@ -730,7 +730,7 @@ async function abrirModalFaturamentoView() {
     document.getElementById('fat-view-totais').innerHTML = '';
 
     try {
-        const res = await fetch('/api/relatorios/faturamento', {
+        const res = await fetch(`/api/relatorios/faturamento?cdRestaurante=${cdRestauranteLogado}`, {
             headers: { 'Authorization': `Bearer ${tokenPainel}` }
         });
 

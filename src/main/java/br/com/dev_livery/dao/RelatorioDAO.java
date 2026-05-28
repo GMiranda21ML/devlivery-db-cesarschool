@@ -25,23 +25,30 @@ public class RelatorioDAO {
     }
 
     // Executa a VIEW 1 (Faturamento)
-    public List<FaturamentoDTO> listarFaturamento() throws SQLException {
-        String sql = "SELECT * FROM VIEW_FATURAMENTO_PEDIDOS_CONCLUIDOS";
+    public List<FaturamentoDTO> listarFaturamento(Integer cdRestaurante) throws SQLException {
+        String sql = cdRestaurante != null
+                ? "SELECT * FROM VIEW_FATURAMENTO_PEDIDOS_CONCLUIDOS WHERE CD_RESTAURANTE = ?"
+                : "SELECT * FROM VIEW_FATURAMENTO_PEDIDOS_CONCLUIDOS";
+
         List<FaturamentoDTO> lista = new ArrayList<>();
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                lista.add(new FaturamentoDTO(
-                        rs.getInt("CD_PEDIDO"),
-                        rs.getString("RESTAURANTE"),
-                        rs.getString("CLIENTE"),
-                        rs.getString("FORMA_PAGAMENTO"),
-                        rs.getDouble("VALOR_PAGO"),
-                        rs.getTimestamp("DATA_HORA").toLocalDateTime()
-                ));
+            // ← seta ANTES de executar
+            if (cdRestaurante != null) stmt.setInt(1, cdRestaurante);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new FaturamentoDTO(
+                            rs.getInt("CD_PEDIDO"),
+                            rs.getString("RESTAURANTE"),
+                            rs.getString("CLIENTE"),
+                            rs.getString("FORMA_PAGAMENTO"),
+                            rs.getDouble("VALOR_PAGO"),
+                            rs.getTimestamp("DATA_HORA").toLocalDateTime()
+                    ));
+                }
             }
         }
         return lista;
