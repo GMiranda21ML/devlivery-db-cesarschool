@@ -35,7 +35,7 @@ Dashboard estatistico em Python com Streamlit, conectado ao MySQL e com identida
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-copy .env.example .env
+copy .env .env
 streamlit run app.py
 ```
 
