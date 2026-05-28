@@ -163,28 +163,31 @@ public class EntregadorDAO {
                 throw e;
             }
         }
-    }   public List<EntregadorDestaqueDTO> listarDestaques() throws SQLException {
+    }
+    public List<EntregadorDestaqueDTO> listarDestaques() throws SQLException {
 
-        String sqlQuery = """
-            SELECT u.NOME, e.VEICULO, e.NOTA,
-                   classificar_entregador(e.NOTA) AS CLASSIFICACAO
-            FROM ENTREGADOR e JOIN USUARIO u ON e.CPF = u.CPF
-            WHERE e.NOTA > (SELECT AVG(NOTA) FROM ENTREGADOR)
-        """;
+        String sql = """
+        SELECT
+            NOME,
+            VEICULO,
+            NOTA,
+            classificar_entregador(NOTA) AS CLASSIFICACAO
+        FROM VIEW_ENTREGADORES_DESTAQUE
+    """;
 
         List<EntregadorDestaqueDTO> lista = new ArrayList<>();
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sqlQuery);
+             PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                String nome = rs.getString("NOME");
-                String veiculo = rs.getString("VEICULO");
-                Double nota = rs.getDouble("NOTA");
-
-                String classificacao = rs.getString("CLASSIFICACAO");
-                lista.add(new EntregadorDestaqueDTO(nome, veiculo, nota, classificacao));
+                lista.add(new EntregadorDestaqueDTO(
+                        rs.getString("NOME"),
+                        rs.getString("VEICULO"),
+                        rs.getDouble("NOTA"),
+                        rs.getString("CLASSIFICACAO")
+                ));
             }
         }
         return lista;

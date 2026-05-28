@@ -120,11 +120,30 @@ public class ProdutoDAO {
     }
 
     public void deletar(Integer cdProduto) throws SQLException {
-        String sql = "DELETE FROM PRODUTO WHERE CD_PRODUTO = ?";
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, cdProduto);
-            stmt.executeUpdate();
+        String sqlAvalia  = "DELETE FROM AVALIA WHERE CD_PRODUTO = ?";
+        String sqlContem  = "DELETE FROM CONTEM WHERE CD_PRODUTO = ?";
+        String sqlProduto = "DELETE FROM PRODUTO WHERE CD_PRODUTO = ?";
+
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement ps = conn.prepareStatement(sqlAvalia)) {
+                    ps.setInt(1, cdProduto);
+                    ps.executeUpdate();
+                }
+                try (PreparedStatement ps = conn.prepareStatement(sqlContem)) {
+                    ps.setInt(1, cdProduto);
+                    ps.executeUpdate();
+                }
+                try (PreparedStatement ps = conn.prepareStatement(sqlProduto)) {
+                    ps.setInt(1, cdProduto);
+                    ps.executeUpdate();
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
         }
     }
 }

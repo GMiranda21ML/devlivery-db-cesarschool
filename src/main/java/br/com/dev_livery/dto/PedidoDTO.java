@@ -6,6 +6,7 @@ import java.util.List;
 public record PedidoDTO(
         String cpfCliente,
         Integer cdRestaurante,
-        List<PedidoItemDTO> items
+        List<PedidoItemDTO> items,
+        Double valorComDesconto
 ) {}
 

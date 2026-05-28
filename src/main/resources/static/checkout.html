@@ -57,15 +57,14 @@
 <script>
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     const token = localStorage.getItem('token');
+    let valorComDesconto = null; // guarda o valor calculado pelo banco
 
     document.addEventListener('DOMContentLoaded', () => {
         if (!token) {
             window.location.href = 'login.html';
             return;
         }
-
         renderCart();
-
         const form = document.getElementById('checkout-form');
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -75,13 +74,13 @@
 
     function renderCart() {
         const container = document.getElementById('cart-items');
-        const valorOriginal = document.getElementById('valor-original');
-        const valorFinal = document.getElementById('valor-final');
+        const valorOriginalEl = document.getElementById('valor-original');
+        const valorFinalEl = document.getElementById('valor-final');
 
         if (cart.length === 0) {
             container.innerHTML = '<p>Seu carrinho está vazio!</p>';
-            valorOriginal.textContent = '0.00';
-            valorFinal.textContent = '0.00';
+            valorOriginalEl.textContent = '0.00';
+            valorFinalEl.textContent = '0.00';
             return;
         }
 
@@ -102,47 +101,54 @@
         });
 
         container.innerHTML = html;
-        // Atualiza os spans do novo layout do cupom
-        valorOriginal.textContent = total.toFixed(2);
-        valorFinal.textContent = total.toFixed(2);
+        valorOriginalEl.textContent = total.toFixed(2);
+        valorFinalEl.textContent = total.toFixed(2);
+        valorComDesconto = null; // reset ao re-renderizar
     }
 
-    // ==============================================================
-    // FUNÇÃO QUE ACIONA A FUNCTION calcular_desconto_cupom NO MYSQL
-    // ==============================================================
+    // Aciona a FUNCTION calcular_desconto_cupom no MySQL
     async function aplicarCupomBanco() {
         const valorPedido = parseFloat(document.getElementById('valor-original').textContent);
-        const tipoCupom = document.getElementById('tipo-cupom').value;
 
-        // Regra de negócio simples
+        if (!valorPedido || valorPedido <= 0) {
+            alert('Adicione itens ao carrinho antes de aplicar o cupom.');
+            return;
+        }
+
+        const tipoCupom = document.getElementById('tipo-cupom').value;
         const valorDesconto = tipoCupom === 'PERCENTUAL' ? 10 : 15;
 
         try {
-            // Passando também o token JWT, pois rotas /api/pedidos costumam ser protegidas
-            const response = await fetch(`/api/pedidos/simular-desconto?valorPedido=${valorPedido}&tipoCupom=${tipoCupom}&valorDesconto=${valorDesconto}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
+            const response = await fetch(
+                `/api/pedidos/simular-desconto?valorPedido=${valorPedido}&tipoCupom=${tipoCupom}&valorDesconto=${valorDesconto}`,
+                {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
                 }
-            });
+            );
 
             if (response.ok) {
-                const valorCalculadoPeloBanco = await response.json();
-                document.getElementById('valor-final').textContent = valorCalculadoPeloBanco.toFixed(2);
-                alert("Cupom aplicado com sucesso usando a Function do MySQL!");
+                valorComDesconto = await response.json();
+                document.getElementById('valor-final').textContent = valorComDesconto.toFixed(2);
+                alert(`Cupom aplicado! Valor com desconto: R$ ${valorComDesconto.toFixed(2)}`);
+            } else if (response.status === 403) {
+                alert('Apenas clientes podem aplicar cupons. Faça login como cliente.');
             } else {
-                alert("Falha ao simular o desconto no servidor.");
+                alert('Falha ao calcular o desconto no servidor.');
             }
         } catch (error) {
             console.error('Erro na requisição do cupom:', error);
-            alert("Erro ao calcular cupom.");
+            alert('Erro ao conectar com o servidor.');
         }
     }
 
     async function finalizarPedido() {
         try {
             const decoded = parseJwt(token);
-            const cdRestaurante = cart[0].cdRestaurante;
+            if (!decoded) { alert('Sessão inválida. Faça login novamente.'); return; }
+
+            const cdRestaurante = cart[0]?.cdRestaurante;
+            if (!cdRestaurante) { alert('Carrinho inválido.'); return; }
 
             const data = {
                 cpfCliente: decoded.sub,
@@ -150,7 +156,8 @@
                 items: cart.map(item => ({
                     cdProduto: item.cdProduto,
                     quantidade: item.quantidade
-                }))
+                })),
+                valorComDesconto: valorComDesconto
             };
 
             const response = await fetch('/api/pedidos', {
@@ -180,13 +187,11 @@
         try {
             const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
+            const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c =>
+                '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+            ).join(''));
             return JSON.parse(jsonPayload);
-        } catch (e) {
-            return null;
-        }
+        } catch (e) { return null; }
     }
 </script>
 </body>

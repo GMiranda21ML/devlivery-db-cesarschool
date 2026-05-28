@@ -40,9 +40,13 @@ public class PedidoDAO {
                     }
                 }
 
+                double valorInserido = (pedido.valorComDesconto() != null && pedido.valorComDesconto() > 0)
+                        ? pedido.valorComDesconto()
+                        : valorTotal;
+
                 try (PreparedStatement stmtPedido = conn.prepareStatement(sqlPedido)) {
                     stmtPedido.setInt(1, nextCdPedido);
-                    stmtPedido.setDouble(2, valorTotal);
+                    stmtPedido.setDouble(2, valorInserido);
                     stmtPedido.setInt(3, pedido.cdRestaurante());
                     stmtPedido.setString(4, pedido.cpfCliente());
                     stmtPedido.executeUpdate();
@@ -68,7 +72,7 @@ public class PedidoDAO {
                     stmtPag.setInt(1, nextCdPag);
                     stmtPag.setInt(2, nextCdPedido);
                     stmtPag.setString(3, "PIX");
-                    stmtPag.setDouble(4, valorTotal);
+                    stmtPag.setDouble(4, valorInserido);
                     stmtPag.executeUpdate();
                 }
 
