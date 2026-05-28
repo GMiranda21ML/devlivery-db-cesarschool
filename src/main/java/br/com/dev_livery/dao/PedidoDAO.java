@@ -74,7 +74,6 @@ public class PedidoDAO {
 
                 conn.commit();
 
-                conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
                 throw e;
@@ -173,37 +172,17 @@ public class PedidoDAO {
         return 0.0;
     }
 
+    // Chama a procedure atualizar_status_pedido definida no banco de dados.
+    // A procedure faz o UPDATE no status E registra no HISTORICO_STATUS automaticamente.
     public void atualizarStatusPedido(Integer cdPedido, String novoStatus) throws SQLException {
-        String sqlUpdate = "UPDATE PEDIDO SET STATUS = ? WHERE CD_PEDIDO = ?";
-        String sqlHistId = "SELECT COALESCE(MAX(CD_HISTORICO), 0) + 1 AS NEXT_ID FROM HISTORICO_STATUS";
-        String sqlHist   = "INSERT INTO HISTORICO_STATUS (CD_HISTORICO, CD_PEDIDO, DESCRICAO, DATA_HORA) VALUES (?, ?, ?, NOW())";
+        String sql = "{call atualizar_status_pedido(?, ?)}";
 
-        try (Connection conn = dataSource.getConnection()) {
-            conn.setAutoCommit(false);
-            try {
-                // 1. Atualiza o status
-                try (PreparedStatement stmtUpd = conn.prepareStatement(sqlUpdate)) {
-                    stmtUpd.setString(1, novoStatus);
-                    stmtUpd.setInt(2, cdPedido);
-                    stmtUpd.executeUpdate();
-                }
-                // 2. Registra no histórico
-                int nextId = 1;
-                try (PreparedStatement stmtId = conn.prepareStatement(sqlHistId);
-                     ResultSet rs = stmtId.executeQuery()) {
-                    if (rs.next()) nextId = rs.getInt("NEXT_ID");
-                }
-                try (PreparedStatement stmtHist = conn.prepareStatement(sqlHist)) {
-                    stmtHist.setInt(1, nextId);
-                    stmtHist.setInt(2, cdPedido);
-                    stmtHist.setString(3, "Status alterado para: " + novoStatus);
-                    stmtHist.executeUpdate();
-                }
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
-            }
+        try (Connection conn = dataSource.getConnection();
+             CallableStatement stmt = conn.prepareCall(sql)) {
+
+            stmt.setInt(1, cdPedido);
+            stmt.setString(2, novoStatus);
+            stmt.execute();
         }
     }
 
@@ -235,6 +214,7 @@ public class PedidoDAO {
         }
         return pedidos;
     }
+
     public void confirmarEntrega(Integer cdPedido, String cpfEntregador) throws SQLException {
         String sqlUpdate = "UPDATE PEDIDO SET STATUS = 'Concluido', CPF_ENTREGADOR = ? WHERE CD_PEDIDO = ?";
         String sqlHistId = "SELECT COALESCE(MAX(CD_HISTORICO), 0) + 1 AS NEXT_ID FROM HISTORICO_STATUS";
@@ -280,7 +260,6 @@ public class PedidoDAO {
         }
         return pedidos;
     }
-
 
     private PedidoResponseDTO mapRow(ResultSet rs) throws SQLException {
         return new PedidoResponseDTO(

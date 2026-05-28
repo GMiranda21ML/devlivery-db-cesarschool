@@ -613,6 +613,12 @@ function renderizarListaFiltrada(listaPedidos) {
                     <span style="color: #4a5568; font-size: 14px;">Total pago</span>
                     <strong style="font-size: 20px; color: #ea1d2c;">R$ ${p.valorTotal.toFixed(2).replace('.', ',')}</strong>
                 </div>
+                ${(p.status === 'Concluido' || p.status === 'Entregue') ? `
+                <div style="margin-top: 14px; border-top: 1px solid #edf2f7; padding-top: 14px;">
+                    <a href="avaliacao.html?pedido=${p.cdPedido}" style="display:inline-flex;align-items:center;gap:6px;background:#ea1d2c;color:#fff;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">
+                        <i class="fa-solid fa-star"></i> Avaliar pedido
+                    </a>
+                </div>` : ''}
             </article>
         `;
     }).join('');

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log de Pedidos (Trigger) - Dev-livery</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/fluxo.css">
+  <link rel="stylesheet" href="css/painel.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<header class="admin-topbar">
+  <div class="container admin-topbar-content">
+    <a href="index.html" class="admin-brand">
+      <i class="fa-solid fa-motorcycle"></i>
+      <span>Dev-livery</span>
+    </a>
+    <div class="admin-topbar-actions">
+      <a href="meus-pedidos.html" class="admin-link-btn"><i class="fa-solid fa-arrow-left"></i> Meus Pedidos</a>
+    </div>
+  </div>
+</header>
+
+<main class="container admin-page">
+
+  <section class="admin-hero">
+    <div class="admin-hero__cover"></div>
+    <div class="admin-hero__body">
+      <div class="admin-hero__info">
+        <p class="admin-eyebrow"><i class="fa-solid fa-bolt"></i> Trigger: trg_log_novo_pedido</p>
+        <h1>Log de Pedidos</h1>
+      </div>
+    </div>
+  </section>
+
+  <div class="admin-card" style="margin-top: 32px;">
+    <div class="admin-section-header">
+      <div>
+        <p class="admin-eyebrow">Tabela LOG_PEDIDOS</p>
+        <h2>Registros gerados pelo trigger</h2>
+      </div>
+      <button onclick="carregarLogs()" class="admin-primary-btn">
+        <i class="fa-solid fa-rotate-right"></i> Atualizar
+      </button>
+    </div>
+
+    <div id="logs-container" style="margin-top: 24px; overflow-x: auto;">
+      <p class="log-loading"><i class="fa-solid fa-spinner fa-spin"></i> Carregando logs...</p>
+    </div>
+  </div>
+
+</main>
+
+<style>
+  .trigger-info-box {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #7c2d12;
+      line-height: 1.6;
+  }
+  .trigger-info-box i { color: #ea580c; font-size: 18px; margin-top: 2px; flex-shrink: 0; }
+  .trigger-info-box code {
+      background: #fed7aa;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+  }
+
+  .log-loading { color: var(--admin-muted); font-size: 14px; }
+
+  .log-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      min-width: 700px;
+  }
+  .log-table thead tr {
+      background: #f4f4f8;
+  }
+  .log-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--admin-muted);
+      border-bottom: 1px solid var(--admin-border);
+  }
+  .log-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--admin-border);
+      color: var(--admin-text);
+      vertical-align: middle;
+  }
+  .log-table tbody tr:last-child td { border-bottom: none; }
+  .log-table tbody tr:hover { background: #fafafa; }
+
+  .badge-log {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #dcfce7;
+      color: #15803d;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+  }
+
+  .log-empty {
+      text-align: center;
+      padding: 48px 0;
+      color: var(--admin-muted);
+      font-size: 15px;
+  }
+  .log-empty i { font-size: 32px; margin-bottom: 12px; display: block; }
+
+  .log-total-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f0f0f8;
+      color: var(--admin-muted);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+  }
+</style>
+
+<script>
+  async function carregarLogs() {
+      const container = document.getElementById('logs-container');
+      container.innerHTML = '<p class="log-loading"><i class="fa-solid fa-spinner fa-spin"></i> Carregando logs...</p>';
+
+      try {
+          const res = await fetch('/api/logs/pedidos');
+          if (!res.ok) throw new Error('Erro ao buscar logs');
+          const logs = await res.json();
+
+          if (logs.length === 0) {
+              container.innerHTML = `
+                  <div class="log-empty">
+                      <i class="fa-solid fa-inbox"></i>
+                      Nenhum log encontrado. Faça um pedido para ver o trigger em ação!
+                  </div>`;
+              return;
+          }
+
+          const formatVal = (v) => v != null ? 'R$ ' + Number(v).toFixed(2).replace('.', ',') : '-';
+          const formatData = (d) => d ? d.replace('T', ' ').substring(0, 19) : '-';
+
+          let html = `<p class="log-total-badge"><i class="fa-solid fa-database"></i> ${logs.length} registro(s) em LOG_PEDIDOS</p>`;
+          html += `
+              <table class="log-table">
+                  <thead>
+                      <tr>
+                          <th>#CD_LOG</th>
+                          <th>CD_PEDIDO</th>
+                          <th>CPF_CLIENTE</th>
+                          <th>VALOR_TOTAL</th>
+                          <th>DATA_HORA</th>
+                          <th>OPERACAO</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      ${logs.map(l => `
+                          <tr>
+                              <td><strong>${l.cdLog}</strong></td>
+                              <td>#${l.cdPedido}</td>
+                              <td>${l.cpfCliente || '-'}</td>
+                              <td>${formatVal(l.valorTotal)}</td>
+                              <td style="font-family:monospace;font-size:13px;">${formatData(l.dataHora)}</td>
+                              <td><span class="badge-log"><i class="fa-solid fa-bolt"></i>${l.operacao}</span></td>
+                          </tr>
+                      `).join('')}
+                  </tbody>
+              </table>`;
+          container.innerHTML = html;
+
+      } catch (e) {
+          container.innerHTML = `<p style="color:#dc2626;font-size:14px;"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao carregar logs: ${e.message}</p>`;
+      }
+  }
+
+  carregarLogs();
+</script>
+
+</body>
+</html>

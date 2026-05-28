@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliar Pedido - Dev-livery</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/fluxo.css">
+    <link rel="stylesheet" href="css/painel.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="container navbar-content">
+        <a href="index.html" class="logo text-link">
+            <i class="fa-solid fa-motorcycle"></i>
+            <h1>Dev-livery</h1>
+        </a>
+        <div class="nav-actions">
+            <a href="meus-pedidos.html" class="btn-icon text-link">
+                <i class="fa-solid fa-receipt" style="color:#ea1d2c;"></i>
+                <span>Meus Pedidos</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="container fluxo-page">
+
+    <a href="meus-pedidos.html" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> Voltar para meus pedidos
+    </a>
+
+    <!-- Hero -->
+    <section class="section-card" style="padding:32px;margin-bottom:24px;">
+        <p class="eyebrow"><i class="fa-solid fa-bolt"></i> Trigger: trg_atualizar_nota_entregador</p>
+        <h2 style="margin:8px 0 4px;">Avaliar Pedido</h2>
+        <p style="color:#6b7280;font-size:14px;margin:0;line-height:1.6;">
+            Ao enviar sua avaliação, o banco insere em
+            <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:13px;">AVALIA</code>
+            e o trigger
+            <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:13px;">trg_atualizar_nota_entregador</code>
+            recalcula automaticamente a nota do entregador.
+        </p>
+    </section>
+
+    <!-- Sem login -->
+    <section class="section-card" id="sem-login" style="padding:40px;text-align:center;display:none;">
+        <i class="fa-solid fa-lock" style="font-size:40px;color:#d1d5db;margin-bottom:16px;"></i>
+        <h3 style="margin:0 0 8px;">Você precisa estar logado</h3>
+        <p style="color:#6b7280;font-size:14px;margin:0 0 20px;">Faça login como cliente para avaliar seus pedidos.</p>
+        <a href="login.html" class="admin-primary-btn text-link" style="text-decoration:none;display:inline-flex;">
+            <i class="fa-solid fa-right-to-bracket"></i> Fazer login
+        </a>
+    </section>
+
+    <!-- Loading -->
+    <section class="section-card" id="loading-pedidos" style="padding:40px;text-align:center;">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;color:#ea1d2c;margin-bottom:12px;"></i>
+        <p style="color:#6b7280;margin:0;font-size:14px;">Carregando seus pedidos concluídos...</p>
+    </section>
+
+    <!-- Passo 1: escolher pedido -->
+    <section class="section-card" id="step-pedido" style="padding:28px;margin-bottom:20px;display:none;">
+        <h3 style="margin-top:0;margin-bottom:18px;">1. Selecione o pedido concluído</h3>
+        <div id="lista-pedidos-concluidos" style="display:flex;flex-direction:column;gap:12px;"></div>
+        <p id="sem-pedidos" style="color:#6b7280;font-size:14px;display:none;margin:0;">
+            <i class="fa-solid fa-inbox"></i> Nenhum pedido concluído encontrado.
+            <a href="index.html" style="color:#ea1d2c;font-weight:600;text-decoration:none;">Faça seu primeiro pedido!</a>
+        </p>
+    </section>
+
+    <!-- Passo 2: produto + nota -->
+    <section class="section-card" id="step-avaliar" style="padding:28px;margin-bottom:20px;display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap;">
+            <h3 style="margin:0;">2. Avalie o produto</h3>
+            <button onclick="voltarEscolhaPedido()" style="background:none;border:1px solid #e5e7eb;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;color:#6b7280;">
+                <i class="fa-solid fa-arrow-left"></i> Trocar pedido
+            </button>
+        </div>
+
+        <!-- Resumo do pedido selecionado -->
+        <div id="resumo-pedido" style="background:#fff5f6;border:1px solid #fecdd3;border-radius:12px;padding:14px 18px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <div>
+                <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#ea1d2c;">Pedido selecionado</span>
+                <p id="resumo-pedido-info" style="margin:4px 0 0;font-weight:600;font-size:15px;color:#111;"></p>
+            </div>
+            <span id="resumo-pedido-valor" style="font-size:1.3rem;font-weight:800;color:#ea1d2c;"></span>
+        </div>
+
+        <!-- Produto -->
+        <div style="margin-bottom:22px;">
+            <label style="font-weight:600;font-size:14px;display:block;margin-bottom:8px;">Produto</label>
+            <select id="select-produto" style="padding:11px 14px;border:1px solid #d1d5db;border-radius:10px;font-size:14px;width:100%;max-width:420px;font-family:Inter,sans-serif;background:#fff;cursor:pointer;"></select>
+        </div>
+
+        <!-- Estrelas -->
+        <div style="margin-bottom:22px;">
+            <label style="font-weight:600;font-size:14px;display:block;margin-bottom:10px;">Sua nota</label>
+            <div id="star-rating" style="display:flex;gap:8px;">
+                <button class="star" onclick="selecionarNota(1)"><i class="fa-regular fa-star"></i></button>
+                <button class="star" onclick="selecionarNota(2)"><i class="fa-regular fa-star"></i></button>
+                <button class="star" onclick="selecionarNota(3)"><i class="fa-regular fa-star"></i></button>
+                <button class="star" onclick="selecionarNota(4)"><i class="fa-regular fa-star"></i></button>
+                <button class="star" onclick="selecionarNota(5)"><i class="fa-regular fa-star"></i></button>
+            </div>
+            <input type="hidden" id="nota-selecionada" value="0">
+        </div>
+
+        <!-- Comentário -->
+        <div style="margin-bottom:24px;">
+            <label style="font-weight:600;font-size:14px;display:block;margin-bottom:8px;">Comentário <span style="color:#9ca3af;font-weight:400;">(opcional)</span></label>
+            <textarea id="comentario" rows="3" placeholder="Conte como foi sua experiência..."
+                      style="width:100%;max-width:520px;padding:11px 14px;border:1px solid #d1d5db;border-radius:10px;font-family:Inter,sans-serif;font-size:14px;resize:vertical;box-sizing:border-box;outline:none;"></textarea>
+        </div>
+
+        <button onclick="enviarAvaliacao()" class="admin-primary-btn" id="btn-enviar">
+            <i class="fa-solid fa-paper-plane"></i> Enviar avaliação
+        </button>
+        <p id="avaliar-erro" style="color:#dc2626;font-size:13px;margin-top:12px;display:none;"></p>
+    </section>
+
+    <!-- Sucesso -->
+    <section class="section-card" id="step-sucesso" style="padding:40px;text-align:center;display:none;">
+        <div style="width:64px;height:64px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+            <i class="fa-solid fa-check" style="font-size:28px;color:#16a34a;"></i>
+        </div>
+        <h3 style="margin:0 0 8px;">Avaliação enviada!</h3>
+        <p style="color:#6b7280;font-size:14px;margin:0 0 6px;">
+            O trigger <strong>trg_atualizar_nota_entregador</strong> foi disparado.
+        </p>
+        <p style="color:#6b7280;font-size:14px;margin:0 0 24px;">
+            A nota do entregador foi <strong>recalculada automaticamente</strong> pelo banco.
+        </p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+            <button onclick="avaliarOutro()" class="admin-primary-btn">
+                <i class="fa-solid fa-star"></i> Avaliar outro produto
+            </button>
+            <a href="meus-pedidos.html" class="admin-outline-btn text-link" style="text-decoration:none;display:inline-flex;">
+                <i class="fa-solid fa-receipt"></i> Meus pedidos
+            </a>
+        </div>
+    </section>
+
+</main>
+
+<style>
+    .star {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 30px;
+        color: #d1d5db;
+        padding: 0;
+        transition: color 0.12s, transform 0.1s;
+        line-height: 1;
+    }
+    .star:hover, .star.ativa { color: #f59e0b; }
+    .star:active { transform: scale(0.88); }
+
+    .pedido-opcao {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 16px 20px;
+        cursor: pointer;
+        background: #fff;
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+        flex-wrap: wrap;
+    }
+    .pedido-opcao:hover {
+        border-color: #ea1d2c;
+        box-shadow: 0 0 0 3px rgba(234,29,44,0.07);
+    }
+    .pedido-opcao.selecionado {
+        border-color: #ea1d2c;
+        background: #fff5f6;
+    }
+
+    .admin-outline-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border: 1.5px solid #ea1d2c;
+        border-radius: 8px;
+        background: #fff;
+        color: #ea1d2c;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .admin-outline-btn:hover { background: #fff5f6; }
+</style>
+
+<script src="js/auth.js"></script>
+<script>
+    let notaAtual = 0;
+    let cdPedidoAtual = null;
+    let pedidoAtualObj = null;
+
+    function getToken() {
+        return localStorage.getItem('token');
+    }
+
+    function getUserCpf() {
+        try {
+            const token = getToken();
+            if (!token) return null;
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.sub || payload.cpf || null;
+        } catch { return null; }
+    }
+
+    function getUserRole() {
+        return localStorage.getItem('role') || null;
+    }
+
+    function fmt(v) {
+        return 'R$ ' + Number(v).toFixed(2).replace('.', ',');
+    }
+
+    async function init() {
+        const token = getToken();
+        const cpf   = getUserCpf();
+        const role  = getUserRole();
+
+        document.getElementById('loading-pedidos').style.display = 'none';
+
+        const roleVal = localStorage.getItem('role');
+        if (!token || !cpf || (roleVal && roleVal !== 'cliente')) {
+            document.getElementById('sem-login').style.display = 'block';
+            return;
+        }
+
+        document.getElementById('loading-pedidos').style.display = 'block';
+
+        try {
+            const res = await fetch(`/api/pedidos/cliente/${cpf}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            document.getElementById('loading-pedidos').style.display = 'none';
+
+            if (!res.ok) {
+                document.getElementById('sem-login').style.display = 'block';
+                return;
+            }
+
+            const pedidos = await res.json();
+            const concluidos = pedidos.filter(p => p.status === 'Concluido' || p.status === 'Entregue');
+
+            document.getElementById('step-pedido').style.display = 'block';
+
+            if (concluidos.length === 0) {
+                document.getElementById('sem-pedidos').style.display = 'block';
+                return;
+            }
+
+            const lista = document.getElementById('lista-pedidos-concluidos');
+            lista.innerHTML = '';
+            concluidos.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'pedido-opcao';
+                div.onclick = () => selecionarPedido(p, div);
+                div.innerHTML = `
+                    <div>
+                        <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#ea1d2c;">Pedido #${p.cdPedido}</span>
+                        <p style="margin:4px 0 0;font-size:14px;color:#6b7280;"><i class="fa-regular fa-calendar" style="margin-right:4px;"></i>${p.data}</p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:14px;">
+                        <span style="font-weight:800;font-size:1.1rem;color:#ea1d2c;">${fmt(p.valorTotal)}</span>
+                        <span style="background:#dcfce7;color:#15803d;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;">Concluído</span>
+                    </div>`;
+                lista.appendChild(div);
+            });
+
+            // Se veio via query string, pré-seleciona
+            const params = new URLSearchParams(window.location.search);
+            const pedidoParam = params.get('pedido');
+            if (pedidoParam) {
+                const alvo = concluidos.find(p => String(p.cdPedido) === pedidoParam);
+                if (alvo) {
+                    const divAlvo = lista.children[concluidos.indexOf(alvo)];
+                    selecionarPedido(alvo, divAlvo);
+                }
+            }
+
+        } catch (e) {
+            document.getElementById('loading-pedidos').style.display = 'none';
+            document.getElementById('sem-login').style.display = 'block';
+        }
+    }
+
+    async function selecionarPedido(pedido, divEl) {
+        // Marca visualmente
+        document.querySelectorAll('.pedido-opcao').forEach(d => d.classList.remove('selecionado'));
+        divEl.classList.add('selecionado');
+
+        cdPedidoAtual = pedido.cdPedido;
+        pedidoAtualObj = pedido;
+
+        document.getElementById('step-avaliar').style.display = 'none';
+        document.getElementById('avaliar-erro').style.display = 'none';
+
+        // Resumo
+        document.getElementById('resumo-pedido-info').textContent = `Pedido #${pedido.cdPedido} · ${pedido.data}`;
+        document.getElementById('resumo-pedido-valor').textContent = fmt(pedido.valorTotal);
+
+        // Busca produtos do pedido
+        try {
+            const res = await fetch(`/api/pedidos/${pedido.cdPedido}/produtos`, {
+                headers: { 'Authorization': 'Bearer ' + getToken() }
+            });
+
+            if (!res.ok) {
+                alert('Não foi possível carregar os produtos deste pedido.');
+                return;
+            }
+
+            const produtos = await res.json();
+            const select = document.getElementById('select-produto');
+            select.innerHTML = '';
+            produtos.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.cdProduto;
+                opt.textContent = `${p.nome} (x${p.quantidade})`;
+                select.appendChild(opt);
+            });
+
+            selecionarNota(0);
+            document.getElementById('comentario').value = '';
+            document.getElementById('step-avaliar').style.display = 'block';
+            document.getElementById('step-avaliar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        } catch (e) {
+            alert('Erro ao carregar produtos: ' + e.message);
+        }
+    }
+
+    function voltarEscolhaPedido() {
+        document.getElementById('step-avaliar').style.display = 'none';
+        document.querySelectorAll('.pedido-opcao').forEach(d => d.classList.remove('selecionado'));
+        cdPedidoAtual = null;
+        document.getElementById('step-pedido').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function selecionarNota(val) {
+        notaAtual = val;
+        document.getElementById('nota-selecionada').value = val;
+        document.querySelectorAll('.star').forEach((btn, i) => {
+            const icon = btn.querySelector('i');
+            if (i < val) {
+                icon.className = 'fa-solid fa-star';
+                btn.classList.add('ativa');
+            } else {
+                icon.className = 'fa-regular fa-star';
+                btn.classList.remove('ativa');
+            }
+        });
+    }
+
+    async function enviarAvaliacao() {
+        const erroEl = document.getElementById('avaliar-erro');
+        erroEl.style.display = 'none';
+
+        if (notaAtual === 0) {
+            erroEl.textContent = 'Selecione uma nota de 1 a 5.';
+            erroEl.style.display = 'block';
+            return;
+        }
+
+        const cpfCliente = getUserCpf();
+        if (!cpfCliente) {
+            erroEl.textContent = 'Sessão expirada. Faça login novamente.';
+            erroEl.style.display = 'block';
+            return;
+        }
+
+        const cdProduto  = parseInt(document.getElementById('select-produto').value);
+        const comentario = document.getElementById('comentario').value.trim();
+
+        const btn = document.getElementById('btn-enviar');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+
+        try {
+            const res = await fetch('/api/avaliacoes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getToken()
+                },
+                body: JSON.stringify({ cpfCliente, cdPedido: cdPedidoAtual, cdProduto, nota: notaAtual, comentario })
+            });
+
+            const msg = await res.text();
+            if (!res.ok) {
+                erroEl.textContent = msg || 'Erro ao enviar avaliação.';
+                erroEl.style.display = 'block';
+                return;
+            }
+
+            document.getElementById('step-pedido').style.display  = 'none';
+            document.getElementById('step-avaliar').style.display = 'none';
+            document.getElementById('step-sucesso').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        } catch (e) {
+            erroEl.textContent = 'Erro de conexão: ' + e.message;
+            erroEl.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar avaliação';
+        }
+    }
+
+    function avaliarOutro() {
+        document.getElementById('step-sucesso').style.display = 'none';
+        document.getElementById('step-avaliar').style.display = 'none';
+        document.getElementById('step-pedido').style.display   = 'block';
+        document.querySelectorAll('.pedido-opcao').forEach(d => d.classList.remove('selecionado'));
+        cdPedidoAtual = null;
+        selecionarNota(0);
+    }
+
+    init();
+</script>
+
+</body>
+</html>

@@ -65,11 +65,16 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.GET,  "/api/pedidos/restaurante/**").hasRole("PARCEIRO")
                         .requestMatchers(HttpMethod.PUT,  "/api/pedidos/*/status").hasRole("PARCEIRO")
 
-                        // 5. AÇÕES DO CLIENTE — criar pedido, consultar os próprios pedidos
+                        // 5. AÇÕES DO CLIENTE — criar pedido, consultar os próprios pedidos, avaliar
                         .requestMatchers("/api/clientes/**").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.POST, "/api/pedidos").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.GET,  "/api/pedidos/cliente/**").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.POST, "/api/pedidos/simular-desconto").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.POST, "/api/avaliacoes").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.GET,  "/api/pedidos/*/produtos").permitAll()
+
+                        // 5b. LOGS DE TRIGGERS — público para fins de demonstração
+                        .requestMatchers(HttpMethod.GET, "/api/logs/pedidos").permitAll()
 
                         // 6. AÇÕES DO ENTREGADOR
                         .requestMatchers("/api/entregadores/**").hasRole("ENTREGADOR")
