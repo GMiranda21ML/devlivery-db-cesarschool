@@ -15,7 +15,7 @@ JOIN
 JOIN
     USUARIO u ON ped.CPF_CLIENTE = u.CPF
 WHERE
-    ped.STATUS = 'Entregue';
+    ped.STATUS = 'Concluido';
 
 
 

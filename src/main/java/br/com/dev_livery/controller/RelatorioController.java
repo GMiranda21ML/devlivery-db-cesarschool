@@ -7,6 +7,7 @@ import br.com.dev_livery.dto.ProdutoPremiumDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLException;
@@ -55,6 +56,15 @@ public class RelatorioController {
     public ResponseEntity<List<Integer>> getSuperRestaurantes() {
         try {
             return ResponseEntity.ok(relatorioDAO.listarSuperRestaurantes());
+        } catch (SQLException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/pedidos-pendentes-por-restaurante")
+    public ResponseEntity<?> getPedidosPendentesPorRestaurante(@RequestParam String nomeRestaurante) {
+        try {
+            return ResponseEntity.ok(relatorioDAO.listarPedidosPendentesPorNomeRestaurante(nomeRestaurante));
         } catch (SQLException e) {
             return ResponseEntity.internalServerError().build();
         }

@@ -2,6 +2,7 @@ package br.com.dev_livery.dao;
 
 import br.com.dev_livery.dto.FaturamentoDTO;
 import br.com.dev_livery.dto.ClienteInativoDTO;
+import br.com.dev_livery.dto.PedidoResponseDTO;
 import br.com.dev_livery.dto.ProdutoPremiumDTO;
 import org.springframework.stereotype.Repository;
 
@@ -123,5 +124,29 @@ public class RelatorioDAO {
             }
         }
         return produtos;
+    }
+
+    public List<PedidoResponseDTO> listarPedidosPendentesPorNomeRestaurante(String nomeRestaurante) throws SQLException {
+        String sql = """
+        SELECT p.CD_PEDIDO, u.NOME AS NOME_CLIENTE, p.DATA, p.VALOR_TOTAL
+        FROM PEDIDO p
+        INNER JOIN USUARIO u ON p.CPF_CLIENTE = u.CPF
+        INNER JOIN RESTAURANTE r ON p.CD_RESTAURANTE = r.CD_RESTAURANTE
+        WHERE r.NOME = ? AND p.STATUS = 'Pendente'
+    """;
+        List<PedidoResponseDTO> lista = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, nomeRestaurante);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new PedidoResponseDTO(
+                            rs.getInt("CD_PEDIDO"), rs.getDouble("VALOR_TOTAL"),
+                            "Pendente", rs.getString("DATA"), 0, ""
+                    ));
+                }
+            }
+        }
+        return lista;
     }
 }

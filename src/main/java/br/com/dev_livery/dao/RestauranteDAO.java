@@ -82,7 +82,6 @@ public class RestauranteDAO {
             sql.append("TEMPO_ENTREGA = ?, "); valores.add(campos.get("tempoEntrega"));
         }
 
-        // Remove última vírgula
         sql.setLength(sql.length() - 2);
         sql.append(" WHERE CD_RESTAURANTE = ?");
         valores.add(cdRestaurante);
@@ -95,7 +94,6 @@ public class RestauranteDAO {
             ps.executeUpdate();
         }
 
-        // Atualiza categoria se fornecida
         if (campos.containsKey("cdCategoria")) {
             String sqlDel = "DELETE FROM PERTENCE WHERE CD_RESTAURANTE = ?";
             String sqlIns = "INSERT INTO PERTENCE (CD_RESTAURANTE, CD_CATEGORIA) VALUES (?, ?)";
@@ -128,9 +126,12 @@ public class RestauranteDAO {
                     R.NOME, U.EMAIL, U.CPF,
                     R.CD_RESTAURANTE, R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
                     R.TELEFONE_RESTAURANTE AS telefoneRestaurante,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM,
+                    C.NOME AS CATEGORIA
                 FROM USUARIO U
                 INNER JOIN RESTAURANTE R ON U.CPF = R.CPF_PARCEIRO
+                LEFT JOIN PERTENCE P ON R.CD_RESTAURANTE = P.CD_RESTAURANTE
+                LEFT JOIN CATEGORIA C ON P.CD_CATEGORIA = C.CD_CATEGORIA
                 WHERE U.CPF = ?
                 """;
 
@@ -152,9 +153,12 @@ public class RestauranteDAO {
                     R.NOME, U.EMAIL, U.CPF,
                     R.CD_RESTAURANTE, R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
                     R.TELEFONE_RESTAURANTE AS telefoneRestaurante,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM,
+                    C.NOME AS CATEGORIA
                 FROM USUARIO U
                 INNER JOIN RESTAURANTE R ON U.CPF = R.CPF_PARCEIRO
+                LEFT JOIN PERTENCE P ON R.CD_RESTAURANTE = P.CD_RESTAURANTE
+                LEFT JOIN CATEGORIA C ON P.CD_CATEGORIA = C.CD_CATEGORIA
                 WHERE U.CPF = ?
                 """;
 
@@ -177,9 +181,12 @@ public class RestauranteDAO {
                     R.NOME, U.EMAIL, U.CPF,
                     R.CD_RESTAURANTE, R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
                     R.TELEFONE_RESTAURANTE AS telefoneRestaurante,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM,
+                    C.NOME AS CATEGORIA
                 FROM USUARIO U
                 INNER JOIN RESTAURANTE R ON U.CPF = R.CPF_PARCEIRO
+                LEFT JOIN PERTENCE P ON R.CD_RESTAURANTE = P.CD_RESTAURANTE
+                LEFT JOIN CATEGORIA C ON P.CD_CATEGORIA = C.CD_CATEGORIA
                 WHERE R.CD_RESTAURANTE = ?
                 """;
 
@@ -201,9 +208,12 @@ public class RestauranteDAO {
                     R.NOME, U.EMAIL, U.CPF,
                     R.CD_RESTAURANTE, R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
                     R.TELEFONE_RESTAURANTE AS telefoneRestaurante,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM,
+                    C.NOME AS CATEGORIA
                 FROM USUARIO U
                 INNER JOIN RESTAURANTE R ON U.CPF = R.CPF_PARCEIRO
+                LEFT JOIN PERTENCE P ON R.CD_RESTAURANTE = P.CD_RESTAURANTE
+                LEFT JOIN CATEGORIA C ON P.CD_CATEGORIA = C.CD_CATEGORIA
                 """;
 
         List<RestauranteResponseDTO> restaurantes = new ArrayList<>();
@@ -223,14 +233,17 @@ public class RestauranteDAO {
                     R.CD_RESTAURANTE, U.CPF, R.NOME, U.EMAIL,
                     R.TELEFONE_RESTAURANTE AS telefoneRestaurante,
                     R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM,
+                    C.NOME AS CATEGORIA
                 FROM USUARIO U
                 INNER JOIN RESTAURANTE R ON U.CPF = R.CPF_PARCEIRO
+                LEFT JOIN PERTENCE PT ON R.CD_RESTAURANTE = PT.CD_RESTAURANTE
+                LEFT JOIN CATEGORIA C ON PT.CD_CATEGORIA = C.CD_CATEGORIA
                 INNER JOIN PRODUTO P ON R.CD_RESTAURANTE = P.CD_RESTAURANTE
                 GROUP BY
                     R.CD_RESTAURANTE, U.CPF, R.NOME, U.EMAIL,
                     R.TELEFONE_RESTAURANTE, R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM, C.NOME
                 HAVING AVG(P.NOTA) > 4.0
                 """;
         List<RestauranteResponseDTO> restaurantes = new ArrayList<>();
@@ -264,8 +277,8 @@ public class RestauranteDAO {
                 nota,
                 taxa,
                 tempo,
-                rs.getString("NOME_IMAGEM")
-
+                rs.getString("NOME_IMAGEM"),
+                rs.getString("CATEGORIA")
         );
     }
 
@@ -275,7 +288,8 @@ public class RestauranteDAO {
                     R.NOME, U.EMAIL, U.CPF,
                     R.CD_RESTAURANTE, R.CNPJ, R.NUMERO, R.CEP, R.BAIRRO, R.RUA, R.CIDADE,
                     R.TELEFONE_RESTAURANTE AS telefoneRestaurante,
-                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM
+                    R.NOTA, R.TAXA_ENTREGA, R.TEMPO_ENTREGA, R.NOME_IMAGEM,
+                    C.NOME AS CATEGORIA
                 FROM USUARIO U
                 INNER JOIN RESTAURANTE R ON U.CPF = R.CPF_PARCEIRO
                 INNER JOIN PERTENCE P ON R.CD_RESTAURANTE = P.CD_RESTAURANTE
@@ -286,9 +300,7 @@ public class RestauranteDAO {
         List<RestauranteResponseDTO> restaurantes = new ArrayList<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setString(1, nomeCategoria);
-
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     restaurantes.add(mapearRestaurante(rs));
@@ -303,7 +315,6 @@ public class RestauranteDAO {
 
         try (Connection conn = dataSource.getConnection();
              CallableStatement stmt = conn.prepareCall(sql)) {
-
             stmt.setInt(1, cdRestaurante);
             stmt.execute();
         }
@@ -315,27 +326,24 @@ public class RestauranteDAO {
         String sqlRestaurante = "DELETE FROM RESTAURANTE WHERE CD_RESTAURANTE = ?";
 
         try (Connection conn = dataSource.getConnection()) {
-            conn.setAutoCommit(false); // Inicia uma transação segura
+            conn.setAutoCommit(false);
             try {
                 try (PreparedStatement ps = conn.prepareStatement(sqlPertence)) {
                     ps.setInt(1, cdRestaurante);
                     ps.executeUpdate();
                 }
-
                 try (PreparedStatement ps = conn.prepareStatement(sqlProduto)) {
                     ps.setInt(1, cdRestaurante);
                     ps.executeUpdate();
                 }
-
                 try (PreparedStatement ps = conn.prepareStatement(sqlRestaurante)) {
                     ps.setInt(1, cdRestaurante);
                     ps.executeUpdate();
                 }
-
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
-                throw e; // Lança o erro para o Controller avisar o usuário
+                throw e;
             }
         }
     }

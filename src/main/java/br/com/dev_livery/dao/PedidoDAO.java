@@ -58,6 +58,22 @@ public class PedidoDAO {
                     stmtContem.executeBatch();
                 }
 
+                String sqlPagamento = "INSERT INTO PAGAMENTO (CD_PAGAMENTO, CD_PEDIDO, TIPO, VALOR, DATA_HORA) VALUES (?, ?, ?, ?, NOW())";
+                int nextCdPag;
+                try (PreparedStatement stmtPagId = conn.prepareStatement("SELECT COALESCE(MAX(CD_PAGAMENTO), 0) + 1 AS NEXT_ID FROM PAGAMENTO");
+                     ResultSet rsPag = stmtPagId.executeQuery()) {
+                    nextCdPag = rsPag.next() ? rsPag.getInt("NEXT_ID") : 1;
+                }
+                try (PreparedStatement stmtPag = conn.prepareStatement(sqlPagamento)) {
+                    stmtPag.setInt(1, nextCdPag);
+                    stmtPag.setInt(2, nextCdPedido);
+                    stmtPag.setString(3, "PIX");
+                    stmtPag.setDouble(4, valorTotal);
+                    stmtPag.executeUpdate();
+                }
+
+                conn.commit();
+
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -141,10 +157,12 @@ public class PedidoDAO {
 
     public Double calcularFaturamentoPorRestaurante(Integer cdRestaurante) throws SQLException {
         String sql = """
-                SELECT COALESCE(SUM(VALOR_TOTAL), 0.0) AS FATURAMENTO
-                FROM PEDIDO
-                WHERE CD_RESTAURANTE = ? AND STATUS = 'Concluido';
-                """;
+               SELECT COALESCE(SUM(VALOR_PAGO), 0.0) AS FATURAMENTO
+               FROM VIEW_FATURAMENTO_PEDIDOS_CONCLUIDOS
+               WHERE CD_PEDIDO IN (
+                   SELECT CD_PEDIDO FROM PEDIDO WHERE CD_RESTAURANTE = ?
+               );
+               """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, cdRestaurante);

@@ -16,5 +16,6 @@ public record RestauranteResponseDTO(
         Double nota,
         Double taxaEntrega,
         Integer tempoEntrega,
-        String nomeImagem
+        String nomeImagem,
+        String categoria
 ) {}

@@ -459,6 +459,9 @@ async function carregarEntregadoresDestaque() {
                         <div style="margin-top: 10px; font-weight: bold; color: #f1c40f;">
                             <i class="fa-solid fa-star"></i> ${ent.nota.toFixed(1)}
                         </div>
+                        <div style="margin-top: 4px; font-size: 12px; color: #1a9c59; font-weight: 600;">
+                            ${ent.classificacao || ''}
+                        </div>
                     </div>
                 `;
             });

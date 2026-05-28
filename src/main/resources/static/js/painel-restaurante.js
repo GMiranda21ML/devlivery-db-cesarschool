@@ -161,12 +161,27 @@ function renderMetrics() {
             <span class="finance-label">Saiu para entrega</span>
             <span class="finance-value">${contadores['Saiu para entrega']}</span>
         </div>
+
         <div style="margin-top: 20px;">
             <button onclick="recalcularNotas()" class="admin-primary-btn" style="width: 100%; background: var(--admin-warning);">
                 <i class="fa-solid fa-star"></i> Recalcular Notas
             </button>
         </div>
     `;
+}
+
+async function demonstrarConsulta2() {
+    const nomeRest = encodeURIComponent(dadosRestauranteAtual.nome);
+    const res = await fetch(`/api/relatorios/pedidos-pendentes-por-restaurante?nomeRestaurante=${nomeRest}`, {
+        headers: { 'Authorization': `Bearer ${tokenPainel}` }
+    });
+    if (res.ok) {
+        const dados = await res.json();
+        await carregarTodosPedidos();
+        alert(`Query 2 — Pedidos Pendentes de "${dadosRestauranteAtual.nome}":\n\n` +
+            (dados.length === 0 ? 'Nenhum pedido pendente.' :
+             dados.map(p => `#${p.cdPedido} — R$ ${p.valorTotal.toFixed(2)} (${p.data})`).join('\n')));
+    }
 }
 
 // --- KANBAN DE PEDIDOS ---

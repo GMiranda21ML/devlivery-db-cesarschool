@@ -166,16 +166,10 @@ public class EntregadorDAO {
     }   public List<EntregadorDestaqueDTO> listarDestaques() throws SQLException {
 
         String sqlQuery = """
-            SELECT 
-                u.NOME, 
-                e.VEICULO, 
-                e.NOTA
-            FROM 
-                ENTREGADOR e
-            JOIN 
-                USUARIO u ON e.CPF = u.CPF
-            WHERE 
-                e.NOTA > (SELECT AVG(NOTA) FROM ENTREGADOR)
+            SELECT u.NOME, e.VEICULO, e.NOTA,
+                   classificar_entregador(e.NOTA) AS CLASSIFICACAO
+            FROM ENTREGADOR e JOIN USUARIO u ON e.CPF = u.CPF
+            WHERE e.NOTA > (SELECT AVG(NOTA) FROM ENTREGADOR)
         """;
 
         List<EntregadorDestaqueDTO> lista = new ArrayList<>();
@@ -189,7 +183,8 @@ public class EntregadorDAO {
                 String veiculo = rs.getString("VEICULO");
                 Double nota = rs.getDouble("NOTA");
 
-                lista.add(new EntregadorDestaqueDTO(nome, veiculo, nota, ""));
+                String classificacao = rs.getString("CLASSIFICACAO");
+                lista.add(new EntregadorDestaqueDTO(nome, veiculo, nota, classificacao));
             }
         }
         return lista;
