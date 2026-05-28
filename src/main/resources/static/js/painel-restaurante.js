@@ -162,7 +162,10 @@ function renderMetrics() {
             <span class="finance-value">${contadores['Saiu para entrega']}</span>
         </div>
 
-        <div style="margin-top: 20px;">
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <button onclick="abrirModalFaturamentoView()" class="admin-primary-btn" style="width: 100%; background: #1a7f4f;">
+                <i class="fa-solid fa-table-list"></i> Ver Faturamento Detalhado
+            </button>
             <button onclick="recalcularNotas()" class="admin-primary-btn" style="width: 100%; background: var(--admin-warning);">
                 <i class="fa-solid fa-star"></i> Recalcular Notas
             </button>
@@ -712,4 +715,89 @@ function bindFormEvents() {
     document.getElementById('product-form').addEventListener('submit', handleFormSubmit);
     document.getElementById('reset-form-btn').addEventListener('click', resetProductForm);
     document.getElementById('cancel-edit-btn').addEventListener('click', resetProductForm);
+}
+// ===== VIEW_FATURAMENTO_PEDIDOS_CONCLUIDOS =====
+
+async function abrirModalFaturamentoView() {
+    const modal = document.getElementById('modal-faturamento-view');
+    modal.classList.remove('hidden-modal');
+
+    // Resetar estado
+    document.getElementById('fat-view-loading').style.display = 'block';
+    document.getElementById('fat-view-table').style.display = 'none';
+    document.getElementById('fat-view-empty').style.display = 'none';
+    document.getElementById('fat-view-tbody').innerHTML = '';
+    document.getElementById('fat-view-totais').innerHTML = '';
+
+    try {
+        const res = await fetch('/api/relatorios/faturamento', {
+            headers: { 'Authorization': `Bearer ${tokenPainel}` }
+        });
+
+        if (!res.ok) throw new Error('Erro ao consultar a view');
+
+        const dados = await res.json();
+        document.getElementById('fat-view-loading').style.display = 'none';
+
+        if (dados.length === 0) {
+            document.getElementById('fat-view-empty').style.display = 'block';
+            return;
+        }
+
+        // Calcular totais por forma de pagamento
+        const totalGeral = dados.reduce((acc, r) => acc + r.valorPago, 0);
+        const porTipo = dados.reduce((acc, r) => {
+            acc[r.formaPagamento] = (acc[r.formaPagamento] || 0) + r.valorPago;
+            return acc;
+        }, {});
+
+        const totaisHtml = `
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 16px; min-width: 140px;">
+                <div style="font-size: 11px; color: #166534; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;">Total Geral</div>
+                <div style="font-size: 18px; font-weight: 700; color: #15803d;">${formatCurrency(totalGeral)}</div>
+                <div style="font-size: 11px; color: #166534;">${dados.length} pedido(s)</div>
+            </div>
+            ${Object.entries(porTipo).map(([tipo, val]) => `
+                <div style="background: #f8f8f8; border: 1px solid #e8e8e8; border-radius: 8px; padding: 10px 16px; min-width: 140px;">
+                    <div style="font-size: 11px; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;">${tipo}</div>
+                    <div style="font-size: 16px; font-weight: 700; color: #333;">${formatCurrency(val)}</div>
+                </div>
+            `).join('')}
+        `;
+        document.getElementById('fat-view-totais').innerHTML = totaisHtml;
+
+        // Popular tabela
+        const tbody = document.getElementById('fat-view-tbody');
+        dados.forEach((row, i) => {
+            const dataHora = row.dataHora
+                ? new Date(row.dataHora).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : '—';
+            tbody.innerHTML += `
+                <tr style="border-bottom: 1px solid #f0f0f0; background: ${i % 2 === 0 ? '#fff' : '#fafafa'};">
+                    <td style="padding: 10px 14px; font-weight: 600; color: #ea1d2c;">#${row.cdPedido}</td>
+                    <td style="padding: 10px 14px; color: #333;">${row.restaurante}</td>
+                    <td style="padding: 10px 14px; color: #555;">${row.cliente}</td>
+                    <td style="padding: 10px 14px;">
+                        <span style="background: #f0f0f0; padding: 3px 8px; border-radius: 20px; font-size: 12px; font-weight: 500;">${row.formaPagamento}</span>
+                    </td>
+                    <td style="padding: 10px 14px; text-align: right; font-weight: 600; color: #15803d;">${formatCurrency(row.valorPago)}</td>
+                    <td style="padding: 10px 14px; color: #888; font-size: 12px;">${dataHora}</td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('fat-view-table').style.display = 'table';
+
+    } catch (err) {
+        document.getElementById('fat-view-loading').innerHTML =
+            `<i class="fa-solid fa-circle-exclamation" style="color:#ea1d2c"></i> Erro ao carregar dados da view.`;
+    }
+}
+
+function fecharModalFaturamento(event) {
+    // Fecha ao clicar no backdrop (o event vem do onclick do overlay)
+    // ou quando chamado diretamente (sem event)
+    if (!event || event.target === document.getElementById('modal-faturamento-view')) {
+        document.getElementById('modal-faturamento-view').classList.add('hidden-modal');
+    }
 }

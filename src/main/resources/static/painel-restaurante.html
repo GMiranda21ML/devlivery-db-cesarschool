@@ -282,6 +282,55 @@
 <!-- ===== TOAST NOTIFICATION ===== -->
 <div id="toast" class="toast hidden-toast"></div>
 
+<!-- ===== MODAL VIEW FATURAMENTO ===== -->
+<div class="confirm-modal hidden-modal" id="modal-faturamento-view" onclick="fecharModalFaturamento(event)">
+    <div class="confirm-modal-card" style="max-width: 860px; width: 95%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-shrink: 0;">
+            <div>
+                <p class="admin-eyebrow" style="margin: 0 0 4px 0;">
+                    <i class="fa-solid fa-database" style="color: #ea1d2c;"></i>
+                    VIEW_FATURAMENTO_PEDIDOS_CONCLUIDOS
+                </p>
+                <h3 style="margin: 0; font-size: 1.2rem;">Faturamento Detalhado</h3>
+                <p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">Todos os pedidos com status <strong>Concluído</strong> e seus pagamentos</p>
+            </div>
+            <button onclick="fecharModalFaturamento()" style="background: none; border: none; cursor: pointer; font-size: 20px; color: #999; padding: 4px 8px;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Totalizador -->
+        <div id="fat-view-totais" style="display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; flex-shrink: 0;"></div>
+
+        <!-- Tabela -->
+        <div style="overflow-y: auto; flex: 1; border: 1px solid #e8e8e8; border-radius: 10px;">
+            <div id="fat-view-loading" style="padding: 32px; text-align: center; color: #999;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Consultando a view no banco...
+            </div>
+            <table id="fat-view-table" style="width: 100%; border-collapse: collapse; display: none; font-size: 13.5px;">
+                <thead>
+                <tr style="background: #f4f4f8; position: sticky; top: 0;">
+                    <th style="padding: 10px 14px; text-align: left; font-weight: 600; color: #444; border-bottom: 1px solid #e8e8e8;">Pedido</th>
+                    <th style="padding: 10px 14px; text-align: left; font-weight: 600; color: #444; border-bottom: 1px solid #e8e8e8;">Restaurante</th>
+                    <th style="padding: 10px 14px; text-align: left; font-weight: 600; color: #444; border-bottom: 1px solid #e8e8e8;">Cliente</th>
+                    <th style="padding: 10px 14px; text-align: left; font-weight: 600; color: #444; border-bottom: 1px solid #e8e8e8;">Pagamento</th>
+                    <th style="padding: 10px 14px; text-align: right; font-weight: 600; color: #444; border-bottom: 1px solid #e8e8e8;">Valor</th>
+                    <th style="padding: 10px 14px; text-align: left; font-weight: 600; color: #444; border-bottom: 1px solid #e8e8e8;">Data/Hora</th>
+                </tr>
+                </thead>
+                <tbody id="fat-view-tbody"></tbody>
+            </table>
+            <div id="fat-view-empty" style="padding: 32px; text-align: center; color: #999; display: none;">
+                <i class="fa-solid fa-receipt"></i> Nenhum pedido concluído encontrado.
+            </div>
+        </div>
+
+        <div class="confirm-modal-actions" style="flex-shrink: 0; margin-top: 16px;">
+            <button class="admin-secondary-btn" onclick="fecharModalFaturamento()">Fechar</button>
+        </div>
+    </div>
+</div>
+
 <script src="js/painel-restaurante.js"></script>
 </body>
 </html>

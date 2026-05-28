@@ -484,28 +484,27 @@ function openCart() {
 
 async function finalizarPedido() {
     const carrinho = JSON.parse(localStorage.getItem('carrinho'));
-
     if (!carrinho || carrinho.length === 0) {
         alert("O seu carrinho está vazio!");
         return;
     }
-
     const token = localStorage.getItem('token');
     if (!token) {
         window.location.href = 'login.html';
         return;
     }
-
     const payload = JSON.parse(atob(token.split('.')[1]));
     const cpfDoCliente = payload.sub;
 
+    // Correção: Adicionando 'valorComDesconto' ao objeto
     const pedidoDTO = {
         cpfCliente: cpfDoCliente,
         cdRestaurante: carrinho[0].cdRestaurante,
         items: carrinho.map(item => ({
             cdProduto: item.cdProduto,
             quantidade: item.quantidade || 1
-        }))
+        })),
+        valorComDesconto: totalComDescontoGlobal // <-- Campo adicionado aqui!
     };
 
     try {
@@ -517,7 +516,6 @@ async function finalizarPedido() {
             },
             body: JSON.stringify(pedidoDTO)
         });
-
         if (response.ok) {
             localStorage.removeItem('carrinho'); // Limpa o carrinho após sucesso
             alert("Pedido realizado com sucesso!");
@@ -531,6 +529,7 @@ async function finalizarPedido() {
         alert("Erro de conexão com o servidor.");
     }
 }
+
 function adicionarAoCarrinhoReal(cdProduto, nome, preco, cdRestaurante) {
     let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 
@@ -569,10 +568,26 @@ async function carregarMeusPedidos() {
 
             const statsContainer = document.getElementById('orders-stats');
             if(statsContainer) {
+                statsContainer.style.display = 'grid';
+                statsContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                statsContainer.style.gap = '16px';
+                statsContainer.style.marginBottom = '24px';
+
                 statsContainer.innerHTML = `
-                    <article class="stat-card"><h3>${todosOsPedidosDoCliente.length}</h3><p>Pedidos totais</p></article>
-                    <article class="stat-card"><h3>${pendentes}</h3><p>Em andamento</p></article>
-                    <article class="stat-card"><h3>${concluidos}</h3><p>Entregues</p></article>
+                    <article class="stat-card" style="text-align: center; padding: 8px 16px; border-radius: 12px;">
+                        <h3 style="font-size: 2rem; margin: 0 0 2px 0; font-weight: bold;">${todosOsPedidosDoCliente.length}</h3>
+                        <p style="margin: 0; color: #a0aec0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Pedidos totais</p>
+                    </article>
+
+                    <article class="stat-card" style="text-align: center; padding: 8px 16px; border-radius: 12px;">
+                        <h3 style="font-size: 2rem; margin: 0 0 2px 0; font-weight: bold;">${pendentes}</h3>
+                        <p style="margin: 0; color: #a0aec0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Em andamento</p>
+                    </article>
+
+                    <article class="stat-card" style="text-align: center; padding: 8px 16px; border-radius: 12px;">
+                        <h3 style="font-size: 2rem; margin: 0 0 2px 0; font-weight: bold;">${concluidos}</h3>
+                        <p style="margin: 0; color: #a0aec0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Entregues</p>
+                    </article>
                 `;
             }
 
